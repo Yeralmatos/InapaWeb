@@ -1,0 +1,663 @@
+﻿@model List<InapaWeb.Models.Contrato>
+
+@{
+    Layout = null;
+    ViewData["Title"] = "Contratos";
+    var buscar = ViewBag.Buscar as string;
+
+    int totalContratos = Model?.Count ?? 0;
+    int totalPendientes = Model?.Count(c => c.Estado == "Pendiente") ?? 0;
+    int totalActivos = Model?.Count(c => c.Estado == "Activo") ?? 0;
+    int totalRechazados = Model?.Count(c => c.Estado == "Rechazado") ?? 0;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1" />
+
+    <title>Contratos - INAPA</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet" />
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+          rel="stylesheet" />
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #f3f6fb;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            color: #10213f;
+        }
+
+        .page-shell {
+            min-height: 100vh;
+            padding: 28px;
+        }
+
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            padding: 26px 30px;
+            margin-bottom: 24px;
+            border-radius: 20px;
+            color: white;
+            background: linear-gradient(135deg, #06469b, #002d69);
+            box-shadow: 0 14px 34px rgba(2, 48, 112, .22);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-icon {
+            width: 62px;
+            height: 62px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, .14);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            flex-shrink: 0;
+        }
+
+        .top-header h2 {
+            margin: 0 0 5px;
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .top-header p {
+            margin: 0;
+            opacity: .9;
+        }
+
+        .panel-button {
+            padding: 11px 17px;
+            border: none;
+            border-radius: 12px;
+            background: white;
+            color: #06469b;
+            text-decoration: none;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+            .panel-button:hover {
+                background: #edf5ff;
+                color: #06469b;
+            }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+
+        .summary-card {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            border: 1px solid #e3e9f2;
+            border-radius: 16px;
+            background: white;
+            box-shadow: 0 7px 22px rgba(16, 33, 63, .06);
+        }
+
+        .summary-icon {
+            width: 54px;
+            height: 54px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            flex-shrink: 0;
+        }
+
+        .icon-total {
+            background: #e8f1ff;
+            color: #0d6efd;
+        }
+
+        .icon-pending {
+            background: #fff3cd;
+            color: #b77900;
+        }
+
+        .icon-active {
+            background: #d1e7dd;
+            color: #146c43;
+        }
+
+        .icon-rejected {
+            background: #f8d7da;
+            color: #b02a37;
+        }
+
+        .summary-card small {
+            display: block;
+            color: #718096;
+        }
+
+        .summary-card strong {
+            display: block;
+            font-size: 26px;
+            color: #10213f;
+        }
+
+        .main-card {
+            overflow: hidden;
+            border: none;
+            border-radius: 18px;
+            background: white;
+            box-shadow: 0 10px 30px rgba(16, 33, 63, .08);
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            padding: 20px 22px;
+            border-bottom: 1px solid #e8edf4;
+        }
+
+        .toolbar-title h5 {
+            margin: 0 0 4px;
+            font-weight: 800;
+        }
+
+        .toolbar-title small {
+            color: #718096;
+        }
+
+        .search-box {
+            width: 100%;
+            max-width: 560px;
+        }
+
+            .search-box .form-control {
+                border-radius: 12px 0 0 12px;
+                min-height: 44px;
+            }
+
+            .search-box .btn {
+                border-radius: 0;
+            }
+
+                .search-box .btn:last-child {
+                    border-radius: 0 12px 12px 0;
+                }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        .table {
+            margin: 0;
+        }
+
+            .table thead th {
+                padding: 15px 14px;
+                background: #eef4fb;
+                color: #28415f;
+                border-bottom: 1px solid #dce5f0;
+                font-size: 13px;
+                text-transform: uppercase;
+                letter-spacing: .04em;
+                white-space: nowrap;
+            }
+
+            .table tbody td {
+                padding: 16px 14px;
+                vertical-align: middle;
+                border-color: #edf1f6;
+            }
+
+        .contract-code {
+            color: #06469b;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .client-name {
+            color: #10213f;
+            font-weight: 700;
+        }
+
+        .client-email {
+            color: #718096;
+            font-size: 13px;
+        }
+
+        .tariff-name {
+            font-weight: 700;
+            color: #28415f;
+        }
+
+        .tariff-amount {
+            color: #718096;
+            font-size: 13px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 11px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #664d03;
+        }
+
+        .status-active {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .status-rejected {
+            background: #f8d7da;
+            color: #842029;
+        }
+
+        .status-other {
+            background: #e2e3e5;
+            color: #41464b;
+        }
+
+        .action-group {
+            display: flex;
+            gap: 7px;
+            flex-wrap: wrap;
+            min-width: 230px;
+        }
+
+            .action-group .btn {
+                border-radius: 9px;
+                font-weight: 600;
+            }
+
+        .empty-state {
+            padding: 60px 20px;
+            text-align: center;
+            color: #718096;
+        }
+
+            .empty-state i {
+                display: block;
+                margin-bottom: 14px;
+                color: #9fb3c8;
+                font-size: 52px;
+            }
+
+            .empty-state h5 {
+                color: #28415f;
+                font-weight: 800;
+            }
+
+        .alert {
+            border-radius: 12px;
+        }
+
+        @@media (max-width: 1100px) {
+            .summary-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .page-shell {
+                padding: 16px;
+            }
+
+            .top-header {
+                align-items: flex-start;
+                flex-direction: column;
+                padding: 20px;
+            }
+
+            .panel-button {
+                width: 100%;
+                text-align: center;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .toolbar {
+                padding: 16px;
+            }
+
+            .search-box {
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="page-shell">
+
+        <header class="top-header">
+
+            <div class="header-left">
+
+                <div class="header-icon">
+                    <i class="bi bi-file-earmark-text-fill"></i>
+                </div>
+
+                <div>
+                    <h2>Gestión de Contratos</h2>
+
+                    <p>
+                        Consulta, aprueba y administra los contratos del sistema.
+                    </p>
+                </div>
+
+            </div>
+
+            <a asp-controller="Admin"
+               asp-action="Index"
+               class="panel-button">
+
+                <i class="bi bi-grid-fill"></i>
+                Panel principal
+            </a>
+
+        </header>
+
+        <section class="summary-grid">
+
+            <div class="summary-card">
+
+                <div class="summary-icon icon-total">
+                    <i class="bi bi-files"></i>
+                </div>
+
+                <div>
+                    <small>Total de contratos</small>
+                    <strong>@totalContratos</strong>
+                </div>
+
+            </div>
+
+            <div class="summary-card">
+
+                <div class="summary-icon icon-pending">
+                    <i class="bi bi-hourglass-split"></i>
+                </div>
+
+                <div>
+                    <small>Pendientes de aprobación</small>
+                    <strong>@totalPendientes</strong>
+                </div>
+
+            </div>
+
+            <div class="summary-card">
+
+                <div class="summary-icon icon-active">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+
+                <div>
+                    <small>Contratos activos</small>
+                    <strong>@totalActivos</strong>
+                </div>
+
+            </div>
+
+            <div class="summary-card">
+
+                <div class="summary-icon icon-rejected">
+                    <i class="bi bi-x-circle-fill"></i>
+                </div>
+
+                <div>
+                    <small>Contratos rechazados</small>
+                    <strong>@totalRechazados</strong>
+                </div>
+
+            </div>
+
+        </section>
+
+        @if (TempData["MensajeContrato"] != null)
+        {
+            <div class="alert alert-success">
+                <i class="bi bi-check-circle-fill"></i>
+                @TempData["MensajeContrato"]
+            </div>
+        }
+
+        @if (TempData["ErrorContrato"] != null)
+        {
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                @TempData["ErrorContrato"]
+            </div>
+        }
+
+        <div class="main-card">
+
+            <div class="toolbar">
+
+                <div class="toolbar-title">
+                    <h5>Listado de contratos</h5>
+
+                    <small>
+                        Información actualizada desde la base de datos.
+                    </small>
+                </div>
+
+                <form asp-controller="Admin"
+                      asp-action="Contratos"
+                      method="get"
+                      class="input-group search-box">
+
+                    <input type="text"
+                           name="buscar"
+                           value="@buscar"
+                           class="form-control"
+                           placeholder="Buscar por contrato, cliente, correo o estado..." />
+
+                    <button type="submit"
+                            class="btn btn-primary">
+
+                        <i class="bi bi-search"></i>
+                    </button>
+
+                    <a asp-controller="Admin"
+                       asp-action="Contratos"
+                       class="btn btn-outline-secondary">
+
+                        Limpiar
+                    </a>
+
+                </form>
+
+            </div>
+
+            @if (Model == null || !Model.Any())
+            {
+                <div class="empty-state">
+
+                    <i class="bi bi-file-earmark-x-fill"></i>
+
+                    <h5>No hay contratos registrados</h5>
+
+                    <p class="mb-0">
+                        Los contratos generados después de la categorización aparecerán aquí.
+                    </p>
+
+                </div>
+            }
+            else
+            {
+                <div class="table-wrap">
+
+                    <table class="table table-hover align-middle">
+
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Cliente</th>
+                                <th>Tarifa</th>
+                                <th>Inicio</th>
+                                <th>Fin</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+
+                                    <td>
+                                        <span class="contract-code">
+                                            CT-@item.IdContrato.ToString("00000")
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <div class="client-name">
+                                            @(item.Cliente?.Usuario?.NombreUsuario
+                                                                                ?? "Cliente no disponible")
+                                                                                                       </div>
+
+                                        <div class="client-email">
+                                            @(item.Cliente?.Usuario?.Correo
+                                                                                ?? "Sin correo")
+                                                                                            </div>
+                                                                                        </td>
+
+                                    <td>
+                                        <div class="tariff-name">
+                                            @(item.Cliente?.Tarifa?.Descripcion
+                                                                                ?? "Sin tarifa")
+                                                                                            </div>
+
+                                        <div class="tariff-amount">
+                                            RD$
+                                            @(item.Cliente?.Tarifa?.Monto.ToString("N2")
+                                                                                ?? "0.00")
+                                </div>
+                            </td>
+
+                                    <td>
+                                        @item.FechaInicio.ToString("dd/MM/yyyy")
+                                    </td>
+
+                                    <td>
+                                        @item.FechaFin.ToString("dd/MM/yyyy")
+                                    </td>
+
+                                    <td>
+                                @if (item.Estado == "Pendiente")
+                                        {
+                                            <span class="status-badge status-pending">
+                                                <i class="bi bi-hourglass-split"></i>
+                                                Pendiente
+                                            </span>
+                                        }
+                                        else if (item.Estado == "Activo")
+                                        {
+                                            <span class="status-badge status-active">
+                                                <i class="bi bi-check-circle-fill"></i>
+                                                Activo
+                                            </span>
+                                        }
+                                        else if (item.Estado == "Rechazado")
+                                        {
+                                            <span class="status-badge status-rejected">
+                                                <i class="bi bi-x-circle-fill"></i>
+                                                Rechazado
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="status-badge status-other">
+                                                @item.Estado
+                                            </span>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        <div class="action-group">
+
+                                            @if (item.Estado == "Pendiente")
+                                            {
+                                                <a asp-controller="Admin"
+                                                   asp-action="AprobarContrato"
+                                                   asp-route-id="@item.IdContrato"
+                                                   class="btn btn-success btn-sm"
+                                                   onclick="return confirm('¿Deseas aprobar este contrato?');">
+
+                                                    <i class="bi bi-check-circle"></i>
+                                                    Aprobar
+                                                </a>
+
+                                                <a asp-controller="Admin"
+                                                   asp-action="RechazarContrato"
+                                                   asp-route-id="@item.IdContrato"
+                                                   class="btn btn-danger btn-sm"
+                                                   onclick="return confirm('¿Seguro que deseas rechazar este contrato?');">
+
+                                                    <i class="bi bi-x-circle"></i>
+                                                    Rechazar
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted small">
+                                                    Sin acciones pendientes
+                                                </span>
+                                            }
+
+                                        </div>
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</body>
+</html>

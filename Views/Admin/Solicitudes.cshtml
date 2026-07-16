@@ -1,0 +1,785 @@
+﻿@model List<InapaWeb.Models.SolicitudServicio>
+
+@{
+    Layout = null;
+    ViewData["Title"] = "Solicitudes de Servicio";
+
+    var buscar = ViewBag.Buscar as string;
+    var estadoSeleccionado =
+        ViewBag.EstadoSeleccionado as string ?? "Pendiente";
+
+    int totalPendientes = ViewBag.TotalPendientes ?? 0;
+    int totalAprobadas = ViewBag.TotalAprobadas ?? 0;
+    int totalAsignadas = ViewBag.TotalAsignadas ?? 0;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1" />
+
+    <title>Solicitudes de Servicio - INAPA</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet" />
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+          rel="stylesheet" />
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #f3f6fb;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            color: #10213f;
+        }
+
+        .page-shell {
+            min-height: 100vh;
+            padding: 28px;
+        }
+
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            padding: 26px 30px;
+            margin-bottom: 24px;
+            border-radius: 20px;
+            color: white;
+            background: linear-gradient(135deg, #06469b, #002d69);
+            box-shadow: 0 14px 34px rgba(2, 48, 112, .22);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-icon {
+            width: 62px;
+            height: 62px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, .14);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            flex-shrink: 0;
+        }
+
+        .top-header h2 {
+            margin: 0 0 5px;
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .top-header p {
+            margin: 0;
+            opacity: .9;
+        }
+
+        .panel-button {
+            padding: 11px 17px;
+            border: none;
+            border-radius: 12px;
+            background: white;
+            color: #06469b;
+            text-decoration: none;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+            .panel-button:hover {
+                background: #edf5ff;
+                color: #06469b;
+            }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+
+        .summary-card {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            border: 1px solid #e3e9f2;
+            border-radius: 16px;
+            background: white;
+            box-shadow: 0 7px 22px rgba(16, 33, 63, .06);
+        }
+
+        .summary-icon {
+            width: 54px;
+            height: 54px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            flex-shrink: 0;
+        }
+
+        .icon-pending {
+            background: #fff3cd;
+            color: #b77900;
+        }
+
+        .icon-approved {
+            background: #d1e7dd;
+            color: #146c43;
+        }
+
+        .icon-assigned {
+            background: #e8f1ff;
+            color: #0d6efd;
+        }
+
+        .summary-card small {
+            display: block;
+            color: #718096;
+        }
+
+        .summary-card strong {
+            display: block;
+            color: #10213f;
+            font-size: 26px;
+        }
+
+        .main-card {
+            overflow: hidden;
+            border: none;
+            border-radius: 18px;
+            background: white;
+            box-shadow: 0 10px 30px rgba(16, 33, 63, .08);
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            padding: 20px 22px;
+            border-bottom: 1px solid #e8edf4;
+        }
+
+        .toolbar-title h5 {
+            margin: 0 0 4px;
+            font-weight: 800;
+        }
+
+        .toolbar-title small {
+            color: #718096;
+        }
+
+        .filter-form {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            width: 100%;
+            max-width: 760px;
+        }
+
+            .filter-form .search-input {
+                flex: 1 1 330px;
+            }
+
+            .filter-form .state-select {
+                flex: 0 1 190px;
+            }
+
+        .form-control,
+        .form-select {
+            min-height: 44px;
+            border-radius: 11px;
+        }
+
+        .filter-form .btn {
+            min-height: 44px;
+            border-radius: 11px;
+            font-weight: 600;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        .table {
+            margin: 0;
+        }
+
+            .table thead th {
+                padding: 15px 14px;
+                background: #eef4fb;
+                color: #28415f;
+                border-bottom: 1px solid #dce5f0;
+                font-size: 13px;
+                text-transform: uppercase;
+                letter-spacing: .04em;
+                white-space: nowrap;
+            }
+
+            .table tbody td {
+                padding: 16px 14px;
+                vertical-align: middle;
+                border-color: #edf1f6;
+            }
+
+        .request-code {
+            color: #06469b;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .client-name {
+            color: #10213f;
+            font-weight: 700;
+        }
+
+        .client-email {
+            color: #718096;
+            font-size: 13px;
+        }
+
+        .request-type {
+            min-width: 175px;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 11px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #664d03;
+        }
+
+        .status-approved {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .status-assigned {
+            background: #cfe2ff;
+            color: #084298;
+        }
+
+        .status-finished {
+            background: #cff4fc;
+            color: #055160;
+        }
+
+        .status-categorized {
+            background: #e2d9f3;
+            color: #432874;
+        }
+
+        .status-contract {
+            background: #e2e3e5;
+            color: #41464b;
+        }
+
+        .status-rejected {
+            background: #f8d7da;
+            color: #842029;
+        }
+
+        .action-group {
+            display: flex;
+            gap: 7px;
+            flex-wrap: wrap;
+            min-width: 320px;
+        }
+
+            .action-group .btn {
+                border-radius: 9px;
+                font-weight: 600;
+            }
+
+        .empty-state {
+            padding: 60px 20px;
+            text-align: center;
+            color: #718096;
+        }
+
+            .empty-state i {
+                display: block;
+                margin-bottom: 14px;
+                color: #9fb3c8;
+                font-size: 52px;
+            }
+
+            .empty-state h5 {
+                color: #28415f;
+                font-weight: 800;
+            }
+
+        .alert {
+            border-radius: 12px;
+        }
+
+        @@media (max-width: 992px) {
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .top-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .panel-button {
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .page-shell {
+                padding: 16px;
+            }
+
+            .top-header {
+                padding: 20px;
+            }
+
+            .filter-form {
+                max-width: none;
+            }
+
+                .filter-form .search-input,
+                .filter-form .state-select {
+                    flex: 1 1 100%;
+                }
+
+                .filter-form .btn {
+                    flex: 1;
+                }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="page-shell">
+
+        <header class="top-header">
+
+            <div class="header-left">
+
+                <div class="header-icon">
+                    <i class="bi bi-clipboard2-check-fill"></i>
+                </div>
+
+                <div>
+                    <h2>Solicitudes de Servicio</h2>
+
+                    <p>
+                        Revisa y gestiona las solicitudes enviadas por los clientes.
+                    </p>
+                </div>
+
+            </div>
+
+            <a asp-controller="Admin"
+               asp-action="Index"
+               class="panel-button">
+
+                <i class="bi bi-grid-fill"></i>
+                Panel principal
+            </a>
+
+        </header>
+
+        <section class="summary-grid">
+
+            <div class="summary-card">
+
+                <div class="summary-icon icon-pending">
+                    <i class="bi bi-hourglass-split"></i>
+                </div>
+
+                <div>
+                    <small>Pendientes de revisión</small>
+                    <strong>@totalPendientes</strong>
+                </div>
+
+            </div>
+
+            <div class="summary-card">
+
+                <div class="summary-icon icon-approved">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+
+                <div>
+                    <small>Aprobadas sin técnico</small>
+                    <strong>@totalAprobadas</strong>
+                </div>
+
+            </div>
+
+            <div class="summary-card">
+
+                <div class="summary-icon icon-assigned">
+                    <i class="bi bi-person-gear"></i>
+                </div>
+
+                <div>
+                    <small>Levantamientos asignados</small>
+                    <strong>@totalAsignadas</strong>
+                </div>
+
+            </div>
+
+        </section>
+
+        @if (TempData["MensajeSolicitud"] != null)
+        {
+            <div class="alert alert-success">
+                <i class="bi bi-check-circle-fill"></i>
+                @TempData["MensajeSolicitud"]
+            </div>
+        }
+
+        @if (TempData["ErrorSolicitud"] != null)
+        {
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                @TempData["ErrorSolicitud"]
+            </div>
+        }
+
+        <div class="main-card">
+
+            <div class="toolbar">
+
+                <div class="toolbar-title">
+                    <h5>Listado de solicitudes</h5>
+
+                    <small>
+                        Utiliza el buscador y el filtro para consultar los procesos.
+                    </small>
+                </div>
+
+                <form asp-controller="Admin"
+                      asp-action="Solicitudes"
+                      method="get"
+                      class="filter-form">
+
+                    <input type="text"
+                           name="buscar"
+                           value="@buscar"
+                           class="form-control search-input"
+                           placeholder="Buscar cliente, tipo o estado..." />
+
+                    <select name="estado"
+                            class="form-select state-select">
+
+                        <option value="Pendiente"
+                                selected="@(estadoSeleccionado == "Pendiente")">
+                            Pendientes
+                        </option>
+
+                        <option value="Aprobada"
+                                selected="@(estadoSeleccionado == "Aprobada")">
+                            Aprobadas
+                        </option>
+
+                        <option value="Asignada"
+                                selected="@(estadoSeleccionado == "Asignada")">
+                            Asignadas
+                        </option>
+
+                        <option value="Levantamiento Finalizado"
+                                selected="@(estadoSeleccionado == "Levantamiento Finalizado")">
+                            Levantamientos finalizados
+                        </option>
+
+                        <option value="Cliente Categorizado"
+                                selected="@(estadoSeleccionado == "Cliente Categorizado")">
+                            Clientes categorizados
+                        </option>
+
+                        <option value="Contrato Generado"
+                                selected="@(estadoSeleccionado == "Contrato Generado")">
+                            Contratos generados
+                        </option>
+
+                        <option value="Rechazada"
+                                selected="@(estadoSeleccionado == "Rechazada")">
+                            Rechazadas
+                        </option>
+
+                        <option value="Todos"
+                                selected="@(estadoSeleccionado == "Todos")">
+                            Todas
+                        </option>
+
+                    </select>
+
+                    <button type="submit"
+                            class="btn btn-primary">
+
+                        <i class="bi bi-search"></i>
+                        Buscar
+                    </button>
+
+                    <a asp-controller="Admin"
+                       asp-action="Solicitudes"
+                       asp-route-estado="Pendiente"
+                       class="btn btn-outline-secondary">
+
+                        Limpiar
+                    </a>
+
+                </form>
+
+            </div>
+
+            @if (Model == null || !Model.Any())
+            {
+                <div class="empty-state">
+
+                    <i class="bi bi-inbox-fill"></i>
+
+                    <h5>No hay solicitudes para mostrar</h5>
+
+                    <p class="mb-0">
+                        No existen solicitudes que coincidan con el filtro seleccionado.
+                    </p>
+
+                </div>
+            }
+            else
+            {
+                <div class="table-wrap">
+
+                    <table class="table table-hover align-middle">
+
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Cliente</th>
+                                <th>Tipo</th>
+                                <th>Fecha</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+
+                                    <td>
+                                        <span class="request-code">
+                                            SOL-@item.IdSolicitud.ToString("00000")
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <div class="client-name">
+                                            @(item.Cliente?.Usuario?.NombreUsuario
+                                                                                ?? "Cliente no disponible")
+                                                                                                       </div>
+
+                                        <div class="client-email">
+                                            @(item.Cliente?.Usuario?.Correo
+                                                                                ?? "Sin correo")
+                                </div>
+                            </td>
+
+                                    <td class="request-type">
+                                        @item.TipoSolicitud
+                                    </td>
+
+                                    <td>
+                                        @item.FechaSolicitud.ToString("dd/MM/yyyy")
+                                        <br />
+
+                                        <small class="text-muted">
+                                            @item.FechaSolicitud.ToString("hh:mm tt")
+                                        </small>
+                                    </td>
+
+                                    <td>
+                                @if (item.Estado == "Pendiente")
+                                        {
+                                            <span class="status-badge status-pending">
+                                                <i class="bi bi-hourglass-split"></i>
+                                                Pendiente
+                                            </span>
+                                        }
+                                        else if (item.Estado == "Aprobada")
+                                        {
+                                            <span class="status-badge status-approved">
+                                                <i class="bi bi-check-circle-fill"></i>
+                                                Aprobada
+                                            </span>
+                                        }
+                                        else if (item.Estado == "Asignada")
+                                        {
+                                            <span class="status-badge status-assigned">
+                                                <i class="bi bi-person-gear"></i>
+                                                Levantamiento asignado
+                                            </span>
+                                        }
+                                        else if (item.Estado == "Levantamiento Finalizado")
+                                        {
+                                            <span class="status-badge status-finished">
+                                                <i class="bi bi-clipboard-check-fill"></i>
+                                                Levantamiento finalizado
+                                            </span>
+                                        }
+                                        else if (item.Estado == "Cliente Categorizado")
+                                        {
+                                            <span class="status-badge status-categorized">
+                                                <i class="bi bi-tags-fill"></i>
+                                                Cliente categorizado
+                                            </span>
+                                        }
+                                        else if (item.Estado == "Contrato Generado")
+                                        {
+                                            <span class="status-badge status-contract">
+                                                <i class="bi bi-file-earmark-check-fill"></i>
+                                                Contrato generado
+                                            </span>
+                                        }
+                                        else if (item.Estado == "Rechazada")
+                                        {
+                                            <span class="status-badge status-rejected">
+                                                <i class="bi bi-x-circle-fill"></i>
+                                                Rechazada
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="status-badge status-contract">
+                                                @item.Estado
+                                            </span>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        <div class="action-group">
+
+                                            <a asp-controller="Admin"
+                                               asp-action="DetalleSolicitud"
+                                               asp-route-id="@item.IdSolicitud"
+                                               class="btn btn-info btn-sm text-white">
+
+                                                <i class="bi bi-eye-fill"></i>
+                                                Ver
+                                            </a>
+
+                                            @if (item.Estado == "Pendiente")
+                                            {
+                                                <a asp-controller="Admin"
+                                                   asp-action="AprobarSolicitud"
+                                                   asp-route-id="@item.IdSolicitud"
+                                                   class="btn btn-success btn-sm"
+                                                   onclick="return confirm('¿Deseas aprobar esta solicitud?');">
+
+                                                    <i class="bi bi-check-circle"></i>
+                                                    Aprobar
+                                                </a>
+
+                                                <a asp-controller="Admin"
+                                                   asp-action="RechazarSolicitud"
+                                                   asp-route-id="@item.IdSolicitud"
+                                                   class="btn btn-danger btn-sm"
+                                                   onclick="return confirm('¿Seguro que deseas rechazar esta solicitud?');">
+
+                                                    <i class="bi bi-x-circle"></i>
+                                                    Rechazar
+                                                </a>
+                                            }
+
+                                            @if (item.Estado == "Aprobada")
+                                            {
+                                                <a asp-controller="Admin"
+                                                   asp-action="AsignarTecnico"
+                                                   asp-route-id="@item.IdSolicitud"
+                                                   class="btn btn-primary btn-sm">
+
+                                                    <i class="bi bi-person-gear"></i>
+                                                    Asignar técnico
+                                                </a>
+                                            }
+
+                                            @if (item.Estado == "Levantamiento Finalizado")
+                                            {
+                                                <a asp-controller="Admin"
+                                                   asp-action="ResultadoLevantamiento"
+                                                   asp-route-id="@item.IdSolicitud"
+                                                   class="btn btn-dark btn-sm">
+
+                                                    <i class="bi bi-clipboard-check"></i>
+                                                    Ver resultado
+                                                </a>
+
+                                                <a asp-controller="Admin"
+                                                   asp-action="CategorizarCliente"
+                                                   asp-route-id="@item.IdSolicitud"
+                                                   class="btn btn-warning btn-sm">
+
+                                                    <i class="bi bi-tags-fill"></i>
+                                                    Categorizar
+                                                </a>
+                                            }
+
+                                            @if (item.Estado == "Cliente Categorizado")
+                                            {
+                                                <a asp-controller="Admin"
+                                                   asp-action="GenerarContrato"
+                                                   asp-route-id="@item.IdSolicitud"
+                                                   class="btn btn-success btn-sm">
+
+                                                    <i class="bi bi-file-earmark-text-fill"></i>
+                                                    Generar contrato
+                                                </a>
+                                            }
+
+                                        </div>
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</body>
+</html>

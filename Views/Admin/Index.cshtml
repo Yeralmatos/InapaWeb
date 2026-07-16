@@ -1,0 +1,487 @@
+﻿@{
+    Layout = null;
+    var nombreUsuario = ViewBag.NombreUsuario ?? "Administrador";
+    var fechaActual = DateTime.Now.ToString("dd/MM/yyyy");
+    var horaActual = DateTime.Now.ToString("hh:mm tt");
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <title>Panel Administrador - INAPA</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Arial;
+            background: #f4f7fb;
+            color: #071b45;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 270px;
+            background: linear-gradient(180deg, #003b82, #001f4d);
+            color: white;
+            padding: 22px 18px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+            .brand img {
+                width: 65px;
+                height: 65px;
+                object-fit: contain;
+            }
+
+            .brand h2 {
+                margin: 0;
+                font-size: 28px;
+                font-weight: 800;
+            }
+
+            .brand small {
+                font-size: 11px;
+            }
+
+        .menu a {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            color: white;
+            text-decoration: none;
+            padding: 13px 14px;
+            border-radius: 10px;
+            margin-bottom: 7px;
+            font-size: 15px;
+        }
+
+            .menu a:hover,
+            .menu a.active {
+                background: #0d6efd;
+            }
+
+        .menu i {
+            font-size: 21px;
+        }
+
+        .main {
+            margin-left: 270px;
+            width: calc(100% - 270px);
+        }
+
+        .topbar {
+            height: 76px;
+            background: white;
+            border-bottom: 1px solid #e0e6ef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 32px;
+        }
+
+            .topbar h1 {
+                font-size: 24px;
+                margin: 0;
+            }
+
+        .user-box {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #003b82;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 27px;
+        }
+
+        .content {
+            padding: 26px 32px;
+        }
+
+        .welcome-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 22px;
+        }
+
+        .welcome h2 {
+            margin: 0;
+            font-size: 26px;
+        }
+
+        .welcome p {
+            margin: 5px 0 0;
+            color: #52627a;
+        }
+
+        .date-box {
+            display: flex;
+            gap: 15px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 13px 18px;
+            border-radius: 12px;
+            color: #52627a;
+            box-shadow: 0 4px 14px rgba(0,0,0,.05);
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 14px rgba(0,0,0,.06);
+            border: 1px solid #e2e8f0;
+        }
+
+        .card-top {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .card-icon {
+            width: 58px;
+            height: 58px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+        }
+
+        .blue {
+            background: #e8f1ff;
+            color: #0d6efd;
+        }
+
+        .green {
+            background: #e9f8ee;
+            color: #198754;
+        }
+
+        .orange {
+            background: #fff2df;
+            color: #fd7e14;
+        }
+
+        .purple {
+            background: #f0e8ff;
+            color: #6f42c1;
+        }
+
+        .cyan {
+            background: #e6f8fb;
+            color: #0aa2c0;
+        }
+
+        .card h4 {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .number {
+            font-size: 31px;
+            font-weight: 800;
+            margin-top: 5px;
+        }
+
+        .card a {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 16px;
+            text-decoration: none;
+            color: #0d6efd;
+            border-top: 1px solid #e5eaf1;
+            padding-top: 12px;
+            font-weight: 600;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 2fr 1.2fr;
+            gap: 18px;
+            margin-top: 20px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 14px rgba(0,0,0,.06);
+            border: 1px solid #e2e8f0;
+        }
+
+        .panel-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+            .panel-head h3 {
+                margin: 0;
+                font-size: 19px;
+            }
+
+            .panel-head a {
+                text-decoration: none;
+                color: #0d6efd;
+                font-weight: 600;
+            }
+
+        .empty {
+            text-align: center;
+            color: #6c757d;
+            padding: 30px;
+        }
+
+            .empty i {
+                font-size: 45px;
+                color: #0d6efd;
+            }
+
+        .quick {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-top: 20px;
+        }
+
+            .quick a {
+                background: white;
+                border: 1px solid #e2e8f0;
+                border-radius: 14px;
+                padding: 20px;
+                text-align: center;
+                text-decoration: none;
+                color: #071b45;
+                font-weight: 700;
+                box-shadow: 0 4px 14px rgba(0,0,0,.05);
+            }
+
+                .quick a:hover {
+                    border-color: #0d6efd;
+                    color: #0d6efd;
+                }
+
+            .quick i {
+                display: block;
+                font-size: 34px;
+                color: #0d6efd;
+                margin-bottom: 8px;
+            }
+
+        .footer {
+            padding: 16px 32px;
+            border-top: 1px solid #e0e6ef;
+            color: #52627a;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            background: white;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="layout">
+
+        <aside class="sidebar">
+            <div class="brand">
+                <img src="/images/inapa-logo.png" alt="Logo INAPA">
+                <div>
+                    <h2>INAPA</h2>
+                    <small>Instituto Nacional de Aguas<br />Potables y Alcantarillados</small>
+                </div>
+            </div>
+
+            <nav class="menu">
+                <a href="/Admin/Index" class="active"><i class="bi bi-house-door-fill"></i> Inicio</a>
+                <a href="/Admin/Usuarios"><i class="bi bi-people-fill"></i> Usuarios</a>
+                <a href="/Admin/Solicitudes"><i class="bi bi-clipboard2-check-fill"></i> Solicitudes de Servicio</a>
+                <a href="/Admin/Contratos"><i class="bi bi-file-earmark-text-fill"></i> Contratos</a>
+                <a href="/Admin/Traslados"><i class="bi bi-truck"></i> Traslados de Servicio</a>
+                <a href="/Admin/AsignarTecnico"><i class="bi bi-person-gear"></i> Asignación de Técnicos</a>
+                <a href="/Admin/Averias"><i class="bi bi-tools"></i> Averías</a>
+                <a href="/Admin/Reclamaciones"><i class="bi bi-chat-dots-fill"></i> Reclamaciones</a>
+                <a href="/Admin/Tarifas"><i class="bi bi-cash-coin"></i> Tarifas y Categorías</a>
+                <a href="/Admin/Facturas"><i class="bi bi-receipt"></i> Facturación y Pagos</a>
+                <a href="/Admin/Reportes"><i class="bi bi-file-earmark-bar-graph-fill"></i> Reportes</a>
+                <a href="/Admin/Estadisticas"><i class="bi bi-bar-chart-fill"></i> Estadísticas</a>
+                <a href="/Admin/RolesPermisos"><i class="bi bi-gear-fill"></i> Roles y Permisos</a>
+                <a href="/Acceso/CerrarSesion"><i class="bi bi-box-arrow-left"></i> Cerrar Sesión</a>
+            </nav>
+        </aside>
+
+        <main class="main">
+
+            <header class="topbar">
+                <h1><i class="bi bi-list"></i> &nbsp; Panel de Control - Administrador</h1>
+
+                <div class="user-box">
+                    <div class="avatar">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                    <div>
+                        <strong>@nombreUsuario</strong><br />
+                        <small>Administrador</small>
+                    </div>
+                </div>
+            </header>
+
+            <section class="content">
+
+                <div class="welcome-row">
+                    <div class="welcome">
+                        <h2>¡Bienvenido, @nombreUsuario!</h2>
+                        <p>Resumen general de operaciones, usuarios y servicios del sistema.</p>
+                    </div>
+
+                    <div class="date-box">
+                        <span><i class="bi bi-calendar-event"></i> @fechaActual</span>
+                        <span><i class="bi bi-clock"></i> @horaActual</span>
+                    </div>
+                </div>
+
+                <div class="cards">
+
+                    <div class="card">
+                        <div class="card-top">
+                            <div class="card-icon blue"><i class="bi bi-people-fill"></i></div>
+                            <div>
+                                <h4>Usuarios Registrados</h4>
+                                <div class="number">@ViewBag.TotalUsuarios</div>
+                            </div>
+                        </div>
+                        <a href="/Admin/Usuarios">Ver usuarios <i class="bi bi-arrow-right"></i></a>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-top">
+                            <div class="card-icon green"><i class="bi bi-clipboard2-check-fill"></i></div>
+                            <div>
+                                <h4>Solicitudes Pendientes</h4>
+                                <div class="number">@ViewBag.TotalSolicitudes</div>
+                            </div>
+                        </div>
+                        <a href="/Admin/Solicitudes">Ver solicitudes <i class="bi bi-arrow-right"></i></a>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-top">
+                            <div class="card-icon orange"><i class="bi bi-tools"></i></div>
+                            <div>
+                                <h4>Averías Activas</h4>
+                                <div class="number">@ViewBag.TotalAverias</div>
+                            </div>
+                        </div>
+                        <a href="/Admin/Averias">Ver averías <i class="bi bi-arrow-right"></i></a>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-top">
+                            <div class="card-icon purple"><i class="bi bi-chat-dots-fill"></i></div>
+                            <div>
+                                <h4>Reclamaciones</h4>
+                                <div class="number">@ViewBag.TotalReclamaciones</div>
+                            </div>
+                        </div>
+                        <a href="/Admin/Reclamaciones">Ver reclamaciones <i class="bi bi-arrow-right"></i></a>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-top">
+                            <div class="card-icon cyan"><i class="bi bi-receipt-cutoff"></i></div>
+                            <div>
+                                <h4>Facturas</h4>
+                                <div class="number">@ViewBag.TotalFacturas</div>
+                            </div>
+                        </div>
+                        <a href="/Admin/Facturas">Ver facturas <i class="bi bi-arrow-right"></i></a>
+                    </div>
+
+                </div>
+
+                <div class="grid">
+
+                    <div class="panel">
+                        <div class="panel-head">
+                            <h3><i class="bi bi-clipboard-check"></i> Solicitudes recientes</h3>
+                            <a href="/Admin/Solicitudes">Ver todas</a>
+                        </div>
+
+                        <div class="empty">
+                            <i class="bi bi-inbox"></i>
+                            <h3>No hay solicitudes registradas</h3>
+                            <p>Cuando los clientes soliciten servicios, aparecerán en esta sección.</p>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-head">
+                            <h3><i class="bi bi-bell"></i> Notificaciones</h3>
+                            <a href="/Admin/Notificaciones">Ver todas</a>
+                        </div>
+
+                        <div class="empty">
+                            <i class="bi bi-bell-slash"></i>
+                            <h3>Sin notificaciones</h3>
+                            <p>No existen notificaciones recientes para mostrar.</p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="quick">
+                    <a href="/Admin/CrearUsuario"><i class="bi bi-person-plus-fill"></i>Registrar Usuario</a>
+                    <a href="/Admin/Solicitudes"><i class="bi bi-clipboard2-check-fill"></i>Solicitudes Pendientes</a>
+                    <a href="/Admin/AsignarTecnico"><i class="bi bi-person-gear"></i>Asignar Técnico</a>
+                    <a href="/Admin/Facturas"><i class="bi bi-cash-coin"></i>Facturación</a>
+                    <a href="/Admin/Reportes"><i class="bi bi-file-earmark-bar-graph-fill"></i>Generar Reporte</a>
+                    <a href="/Admin/RolesPermisos"><i class="bi bi-gear-fill"></i>Roles y Permisos</a>
+                </div>
+
+            </section>
+
+            <div class="footer">
+                <span>© 2026 INAPA - Instituto Nacional de Aguas Potables y Alcantarillados.</span>
+                <span>Versión 1.0.0</span>
+            </div>
+
+        </main>
+
+    </div>
+
+</body>
+</html>

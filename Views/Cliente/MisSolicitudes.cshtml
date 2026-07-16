@@ -1,0 +1,1187 @@
+﻿@model List<InapaWeb.Models.SolicitudServicio>
+
+@{
+    Layout = null;
+    var nombreUsuario = ViewBag.NombreUsuario ?? "Cliente";
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Mis Solicitudes - INAPA</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet" />
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+          rel="stylesheet" />
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f3f6fb;
+            color: #0b1f44;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* =====================================================
+                   BARRA LATERAL
+                ===================================================== */
+
+        .sidebar {
+            width: 280px;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            overflow-y: auto;
+            padding: 22px 16px;
+            background: linear-gradient( 180deg, #063c82 0%, #06285d 55%, #031a3d 100% );
+            color: white;
+            box-shadow: 5px 0 25px rgba(0, 24, 64, .18);
+            z-index: 1000;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 4px 8px 22px;
+            border-bottom: 1px solid rgba(255, 255, 255, .15);
+        }
+
+            .brand img {
+                width: 60px;
+                height: 60px;
+                object-fit: contain;
+                flex-shrink: 0;
+            }
+
+            .brand h2 {
+                margin: 0;
+                font-size: 27px;
+                font-weight: 800;
+                letter-spacing: .5px;
+            }
+
+            .brand small {
+                display: block;
+                margin-top: 2px;
+                font-size: 10px;
+                line-height: 1.35;
+                color: rgba(255, 255, 255, .78);
+            }
+
+        .client-summary {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            margin: 18px 3px;
+            padding: 13px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, .09);
+            border: 1px solid rgba(255, 255, 255, .10);
+        }
+
+        .client-avatar {
+            width: 43px;
+            height: 43px;
+            border-radius: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+            color: #0752b3;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .client-summary strong {
+            display: block;
+            max-width: 165px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            font-size: 14px;
+        }
+
+        .client-summary span {
+            font-size: 12px;
+            color: rgba(255, 255, 255, .72);
+        }
+
+        .menu-section {
+            margin: 20px 12px 8px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.4px;
+            color: rgba(255, 255, 255, .48);
+            text-transform: uppercase;
+        }
+
+        .menu a {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            min-height: 48px;
+            margin-bottom: 5px;
+            padding: 11px 13px;
+            border-radius: 12px;
+            color: rgba(255, 255, 255, .88);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all .2s ease;
+        }
+
+            .menu a i {
+                width: 24px;
+                text-align: center;
+                font-size: 19px;
+            }
+
+            .menu a:hover {
+                color: white;
+                background: rgba(255, 255, 255, .11);
+                transform: translateX(3px);
+            }
+
+            .menu a.active {
+                background: #ffffff;
+                color: #064594;
+                font-weight: 700;
+                box-shadow: 0 8px 20px rgba(0, 0, 0, .15);
+            }
+
+            .menu a.logout {
+                margin-top: 16px;
+                color: #ffd9d9;
+                border: 1px solid rgba(255, 255, 255, .10);
+            }
+
+                .menu a.logout:hover {
+                    background: #b42332;
+                    color: white;
+                }
+
+        /* =====================================================
+                   CONTENIDO PRINCIPAL
+                ===================================================== */
+
+        .main {
+            width: calc(100% - 280px);
+            min-height: 100vh;
+            margin-left: 280px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .topbar {
+            min-height: 76px;
+            padding: 12px 34px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            box-shadow: 0 2px 12px rgba(15, 40, 80, .04);
+        }
+
+        .topbar-title h5 {
+            margin: 0;
+            font-weight: 750;
+            color: #0b1f44;
+        }
+
+        .topbar-title small {
+            color: #718096;
+        }
+
+        .topbar-user {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+        }
+
+        .topbar-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e8f1ff;
+            color: #0752b3;
+            font-size: 22px;
+        }
+
+        .topbar-user strong {
+            display: block;
+            font-size: 14px;
+        }
+
+        .topbar-user small {
+            color: #718096;
+        }
+
+        .content {
+            flex: 1;
+            padding: 32px 36px;
+        }
+
+        /* =====================================================
+                   ENCABEZADO
+                ===================================================== */
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+
+        .page-title-area {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .page-icon {
+            width: 54px;
+            height: 54px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0752b3;
+            color: white;
+            font-size: 25px;
+            box-shadow: 0 10px 22px rgba(7, 82, 179, .20);
+        }
+
+        .page-title-area h2 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 800;
+            color: #0b1f44;
+        }
+
+        .page-title-area p {
+            margin: 4px 0 0;
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .btn-panel {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 16px;
+            border-radius: 11px;
+            border: 1px solid #d9e2ee;
+            background: white;
+            color: #334155;
+            text-decoration: none;
+            font-weight: 650;
+            box-shadow: 0 5px 15px rgba(18, 43, 85, .05);
+            transition: .2s;
+        }
+
+            .btn-panel:hover {
+                color: #0752b3;
+                border-color: #9dbbe3;
+                transform: translateY(-1px);
+            }
+
+        /* =====================================================
+                   RESUMEN
+                ===================================================== */
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 17px;
+            margin-bottom: 24px;
+        }
+
+        .summary-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-height: 100px;
+            padding: 18px;
+            border-radius: 17px;
+            background: white;
+            border: 1px solid #e4eaf2;
+            box-shadow: 0 7px 22px rgba(18, 43, 85, .06);
+        }
+
+        .summary-icon {
+            width: 48px;
+            height: 48px;
+            flex-shrink: 0;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+            .summary-icon.blue {
+                background: #e7f0ff;
+                color: #0752b3;
+            }
+
+            .summary-icon.orange {
+                background: #fff0df;
+                color: #d86800;
+            }
+
+            .summary-icon.green {
+                background: #e5f7eb;
+                color: #16824b;
+            }
+
+        .summary-card span {
+            display: block;
+            color: #718096;
+            font-size: 13px;
+        }
+
+        .summary-card strong {
+            display: block;
+            margin-top: 2px;
+            color: #0b1f44;
+            font-size: 26px;
+            font-weight: 800;
+        }
+
+        /* =====================================================
+                   SOLICITUDES
+                ===================================================== */
+
+        .requests-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .request-card {
+            overflow: hidden;
+            border-radius: 18px;
+            background: white;
+            border: 1px solid #e4eaf2;
+            box-shadow: 0 8px 24px rgba(18, 43, 85, .07);
+        }
+
+        .request-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 18px 21px;
+            background: #fbfdff;
+            border-bottom: 1px solid #e7edf5;
+        }
+
+        .request-heading {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+        }
+
+        .request-code {
+            min-width: 54px;
+            height: 46px;
+            padding: 0 10px;
+            border-radius: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e7f0ff;
+            color: #0752b3;
+            font-weight: 800;
+        }
+
+        .request-heading h4 {
+            margin: 0;
+            font-size: 17px;
+            font-weight: 750;
+            color: #0b1f44;
+        }
+
+        .request-heading small {
+            display: block;
+            margin-top: 4px;
+            color: #718096;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 13px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 750;
+        }
+
+        .status-pending {
+            color: #805700;
+            background: #fff2c7;
+            border: 1px solid #efd37a;
+        }
+
+        .status-approved {
+            color: #12683f;
+            background: #def5e9;
+            border: 1px solid #a9dfc4;
+        }
+
+        .status-assigned {
+            color: #1555a2;
+            background: #e1eeff;
+            border: 1px solid #b9d5fb;
+        }
+
+        .status-rejected {
+            color: #9f2430;
+            background: #ffe5e7;
+            border: 1px solid #f3b8bd;
+        }
+
+        .status-finalized {
+            color: #6843a1;
+            background: #efe8ff;
+            border: 1px solid #d3c1f5;
+        }
+
+        .status-neutral {
+            color: #475569;
+            background: #eef2f6;
+            border: 1px solid #d8dee7;
+        }
+
+        .request-body {
+            padding: 21px;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.4fr) minmax(280px, .8fr);
+            gap: 18px;
+        }
+
+        .detail-box {
+            padding: 17px;
+            border-radius: 15px;
+            border: 1px solid #e4eaf2;
+            background: #fbfcfe;
+        }
+
+        .observation-box {
+            padding: 17px;
+            border-radius: 15px;
+            border: 1px solid #d8e5f7;
+            background: #f3f7ff;
+        }
+
+        .box-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0 0 13px;
+            font-size: 14px;
+            font-weight: 750;
+            color: #26395f;
+        }
+
+            .box-title i {
+                color: #0752b3;
+                font-size: 17px;
+            }
+
+        .detail-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            color: #475569;
+            font-size: 14px;
+            line-height: 1.55;
+        }
+
+        .detail-dot {
+            width: 8px;
+            height: 8px;
+            flex-shrink: 0;
+            margin-top: 7px;
+            border-radius: 50%;
+            background: #4381e8;
+        }
+
+        .observation-text {
+            margin: 0;
+            color: #475569;
+            font-size: 14px;
+            line-height: 1.65;
+        }
+
+        .empty-text {
+            margin: 0;
+            color: #94a3b8;
+            font-size: 14px;
+            font-style: italic;
+        }
+
+        .current-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 17px;
+            padding-top: 15px;
+            border-top: 1px solid #e6ebf2;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+            .current-status i {
+                color: #0752b3;
+            }
+
+        /* =====================================================
+                   SIN SOLICITUDES
+                ===================================================== */
+
+        .empty-state {
+            padding: 55px 25px;
+            border-radius: 19px;
+            text-align: center;
+            background: white;
+            border: 1px solid #e4eaf2;
+            box-shadow: 0 8px 24px rgba(18, 43, 85, .06);
+        }
+
+        .empty-state-icon {
+            width: 78px;
+            height: 78px;
+            margin: 0 auto 17px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e7f0ff;
+            color: #0752b3;
+            font-size: 34px;
+        }
+
+        .empty-state h4 {
+            font-weight: 750;
+        }
+
+        .empty-state p {
+            color: #718096;
+        }
+
+        .btn-new {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 7px;
+            padding: 11px 18px;
+            border-radius: 11px;
+            background: #0752b3;
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+            .btn-new:hover {
+                background: #043d88;
+                color: white;
+            }
+
+        .footer {
+            padding: 17px 30px;
+            text-align: center;
+            color: #718096;
+            background: white;
+            border-top: 1px solid #e4eaf2;
+            font-size: 13px;
+        }
+
+        /* =====================================================
+                   RESPONSIVE
+                ===================================================== */
+
+        @@media (max-width: 1100px) {
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @@media (max-width: 850px) {
+            .layout {
+                display: block;
+            }
+
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+            }
+
+            .main {
+                width: 100%;
+                margin-left: 0;
+            }
+
+            .topbar {
+                padding: 14px 18px;
+            }
+
+            .content {
+                padding: 22px 18px;
+            }
+
+            .page-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .btn-panel {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @@media (max-width: 576px) {
+            .topbar-title {
+                display: none;
+            }
+
+            .request-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .page-title-area h2 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    @{
+        int totalSolicitudes = Model?.Count ?? 0;
+
+        int totalPendientes = Model?
+        .Count(s => s.Estado == "Pendiente") ?? 0;
+
+        int totalProcesadas = Model?
+        .Count(s => s.Estado != "Pendiente") ?? 0;
+    }
+
+    <div class="layout">
+
+        <!-- =====================================================
+             BARRA LATERAL
+        ====================================================== -->
+
+        <aside class="sidebar">
+
+            <div class="brand">
+
+                <img src="/images/inapa-logo.png"
+                     alt="Logo INAPA" />
+
+                <div>
+                    <h2>INAPA</h2>
+
+                    <small>
+                        Instituto Nacional de Aguas<br />
+                        Potables y Alcantarillados
+                    </small>
+                </div>
+
+            </div>
+
+            <div class="client-summary">
+
+                <div class="client-avatar">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+
+                <div>
+                    <strong>@nombreUsuario</strong>
+                    <span>Portal del cliente</span>
+                </div>
+
+            </div>
+
+            <nav class="menu">
+
+                <div class="menu-section">
+                    Principal
+                </div>
+
+                <a asp-controller="Cliente"
+                   asp-action="Index">
+
+                    <i class="bi bi-grid-fill"></i>
+                    Inicio
+                </a>
+
+                <div class="menu-section">
+                    Gestiones
+                </div>
+
+                <a asp-controller="Cliente"
+                   asp-action="NuevaSolicitud">
+
+                    <i class="bi bi-file-earmark-plus-fill"></i>
+                    Solicitar servicio
+                </a>
+
+                <a asp-controller="Cliente"
+                   asp-action="MisSolicitudes"
+                   class="active">
+
+                    <i class="bi bi-list-check"></i>
+                    Mis solicitudes
+                </a>
+
+                <a asp-controller="Cliente"
+                   asp-action="MiContrato">
+
+                    <i class="bi bi-file-earmark-text-fill"></i>
+                    Mi contrato
+                </a>
+
+                <div class="menu-section">
+                    Facturación
+                </div>
+
+                <a href="#">
+
+                    <i class="bi bi-receipt-cutoff"></i>
+                    Mis facturas
+                </a>
+
+                <a href="#">
+
+                    <i class="bi bi-wallet2"></i>
+                    Mis pagos
+                </a>
+
+                <div class="menu-section">
+                    Atención
+                </div>
+
+                <a href="#">
+
+                    <i class="bi bi-tools"></i>
+                    Reportar avería
+                </a>
+
+                <a href="#">
+
+                    <i class="bi bi-chat-square-text-fill"></i>
+                    Reclamaciones
+                </a>
+
+                <a href="#">
+
+                    <i class="bi bi-bell-fill"></i>
+                    Notificaciones
+                </a>
+
+                <div class="menu-section">
+                    Cuenta
+                </div>
+
+                <a href="#">
+
+                    <i class="bi bi-person-circle"></i>
+                    Mi perfil
+                </a>
+
+                <a asp-controller="Acceso"
+                   asp-action="CerrarSesion"
+                   class="logout">
+
+                    <i class="bi bi-box-arrow-left"></i>
+                    Cerrar sesión
+                </a>
+
+            </nav>
+
+        </aside>
+
+        <!-- =====================================================
+             CONTENIDO
+        ====================================================== -->
+
+        <main class="main">
+
+            <header class="topbar">
+
+                <div class="topbar-title">
+
+                    <h5>Mis solicitudes</h5>
+
+                    <small>
+                        Consulta el estado de tus gestiones
+                    </small>
+
+                </div>
+
+                <div class="topbar-user">
+
+                    <div class="topbar-avatar">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+
+                    <div>
+                        <strong>@nombreUsuario</strong>
+                        <small>Cliente</small>
+                    </div>
+
+                </div>
+
+            </header>
+
+            <section class="content">
+
+                <div class="page-header">
+
+                    <div class="page-title-area">
+
+                        <div class="page-icon">
+                            <i class="bi bi-clipboard-check-fill"></i>
+                        </div>
+
+                        <div>
+                            <h2>Mis Solicitudes</h2>
+
+                            <p>
+                                Consulta el estado y las observaciones de tus solicitudes.
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <a asp-controller="Cliente"
+                       asp-action="Index"
+                       class="btn-panel">
+
+                        <i class="bi bi-arrow-left"></i>
+                        Volver al panel
+
+                    </a>
+
+                </div>
+
+                <div class="summary-grid">
+
+                    <div class="summary-card">
+
+                        <div class="summary-icon blue">
+                            <i class="bi bi-files"></i>
+                        </div>
+
+                        <div>
+                            <span>Total de solicitudes</span>
+                            <strong>@totalSolicitudes</strong>
+                        </div>
+
+                    </div>
+
+                    <div class="summary-card">
+
+                        <div class="summary-icon orange">
+                            <i class="bi bi-hourglass-split"></i>
+                        </div>
+
+                        <div>
+                            <span>Solicitudes pendientes</span>
+                            <strong>@totalPendientes</strong>
+                        </div>
+
+                    </div>
+
+                    <div class="summary-card">
+
+                        <div class="summary-icon green">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+
+                        <div>
+                            <span>Solicitudes procesadas</span>
+                            <strong>@totalProcesadas</strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                @if (Model == null || !Model.Any())
+                {
+                    <div class="empty-state">
+
+                        <div class="empty-state-icon">
+                            <i class="bi bi-clipboard-x"></i>
+                        </div>
+
+                        <h4>Aún no tienes solicitudes</h4>
+
+                        <p>
+                            Cuando registres una solicitud podrás consultar aquí su estado.
+                        </p>
+
+                        <a asp-controller="Cliente"
+                           asp-action="NuevaSolicitud"
+                           class="btn-new">
+
+                            <i class="bi bi-plus-circle-fill"></i>
+                            Crear solicitud
+
+                        </a>
+
+                    </div>
+                }
+                else
+                {
+                    <div class="requests-list">
+
+                        @foreach (var item in Model.OrderByDescending(s => s.FechaSolicitud))
+                        {
+                            string estado = item.Estado?.Trim() ?? "Sin estado";
+
+                            string claseEstado = "status-neutral";
+                            string iconoEstado = "bi-info-circle-fill";
+
+                            if (estado.Equals(
+                            "Pendiente",
+                            StringComparison.OrdinalIgnoreCase))
+                            {
+                                claseEstado = "status-pending";
+                                iconoEstado = "bi-hourglass-split";
+                            }
+                            else if (estado.Equals(
+                            "Aprobada",
+                            StringComparison.OrdinalIgnoreCase))
+                            {
+                                claseEstado = "status-approved";
+                                iconoEstado = "bi-check-circle-fill";
+                            }
+                            else if (
+                            estado.Equals(
+                            "Asignada",
+                            StringComparison.OrdinalIgnoreCase) ||
+                            estado.Equals(
+                            "Asignado",
+                            StringComparison.OrdinalIgnoreCase))
+                            {
+                                claseEstado = "status-assigned";
+                                iconoEstado = "bi-person-check-fill";
+                            }
+                            else if (estado.Equals(
+                            "Rechazada",
+                            StringComparison.OrdinalIgnoreCase))
+                            {
+                                claseEstado = "status-rejected";
+                                iconoEstado = "bi-x-circle-fill";
+                            }
+                            else if (
+                            estado.Equals(
+                            "Levantamiento Finalizado",
+                            StringComparison.OrdinalIgnoreCase) ||
+                            estado.Equals(
+                            "Cliente Categorizado",
+                            StringComparison.OrdinalIgnoreCase) ||
+                            estado.Equals(
+                            "Contrato Generado",
+                            StringComparison.OrdinalIgnoreCase) ||
+                            estado.Equals(
+                            "Contrato Aprobado",
+                            StringComparison.OrdinalIgnoreCase) ||
+                            estado.Equals(
+                            "Finalizada",
+                            StringComparison.OrdinalIgnoreCase))
+                            {
+                                claseEstado = "status-finalized";
+                                iconoEstado = "bi-clipboard-check-fill";
+                            }
+
+                            string[] partesDescripcion =
+                            string.IsNullOrWhiteSpace(item.Descripcion)
+                            ? Array.Empty<string>()
+                            : item.Descripcion.Split(
+                            '.',
+                            StringSplitOptions.RemoveEmptyEntries |
+                            StringSplitOptions.TrimEntries
+                            );
+
+                            <article class="request-card">
+
+                                <div class="request-header">
+
+                                    <div class="request-heading">
+
+                                        <div class="request-code">
+                                            #@item.IdSolicitud
+                                        </div>
+
+                                        <div>
+                                            <h4>
+                                                @(string.IsNullOrWhiteSpace(item.TipoSolicitud)
+                                                                                        ? "Solicitud de servicio"
+                                                                                        : item.TipoSolicitud)
+                                    </h4>
+
+                                            <small>
+                                                <i class="bi bi-calendar3 me-1"></i>
+
+                                                Registrada el
+                                                @item.FechaSolicitud.ToString("dd/MM/yyyy")
+                                            </small>
+                                        </div>
+
+                                    </div>
+
+                                    <span class="status-badge @claseEstado">
+
+                                        <i class="bi @iconoEstado"></i>
+                                        @estado
+
+                                    </span>
+
+                                </div>
+
+                                <div class="request-body">
+
+                                    <div class="details-grid">
+
+                                        <div class="detail-box">
+
+                                            <h5 class="box-title">
+
+                                                <i class="bi bi-card-text"></i>
+
+                                                Detalles de la solicitud
+
+                                            </h5>
+
+                                    @if (partesDescripcion.Length == 0)
+                                            {
+                                                <p class="empty-text">
+                                                    No se proporcionó una descripción.
+                                                </p>
+                                            }
+                                            else
+                                            {
+                                                <div class="detail-list">
+
+                                                    @foreach (string parte in partesDescripcion)
+                                                    {
+                                                        <div class="detail-item">
+
+                                                            <span class="detail-dot"></span>
+
+                                                            <span>@parte.</span>
+
+                                                        </div>
+                                                    }
+
+                                                </div>
+                                            }
+
+                                        </div>
+
+                                        <div class="observation-box">
+
+                                            <h5 class="box-title">
+
+                                                <i class="bi bi-chat-left-text-fill"></i>
+
+                                                Observación administrativa
+
+                                            </h5>
+
+                                            @if (string.IsNullOrWhiteSpace(
+                                                                                item.ObservacionAdministrador))
+                                            {
+                                                <p class="empty-text">
+                                                    Todavía no hay observaciones del administrador.
+                                                </p>
+                                            }
+                                            else
+                                            {
+                                                <p class="observation-text">
+                                                    @item.ObservacionAdministrador
+                                                </p>
+                                            }
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="current-status">
+
+                                        <i class="bi bi-arrow-repeat"></i>
+
+                                        <span>
+                                            Estado actual:
+                                            <strong>@estado</strong>
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </article>
+                        }
+
+                    </div>
+                }
+
+            </section>
+
+            <footer class="footer">
+                © 2026 INAPA - Instituto Nacional de Aguas Potables y Alcantarillados
+            </footer>
+
+        </main>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+    </script>
+
+</body>
+</html>

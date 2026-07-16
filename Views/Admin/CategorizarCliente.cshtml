@@ -1,0 +1,282 @@
+﻿@using InapaWeb.Models
+
+@{
+    Layout = null;
+
+    var trabajo = ViewBag.Trabajo as AsignacionTecnico;
+    var tarifas = ViewBag.Tarifas as List<Tarifa>;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Categorizar Cliente - INAPA</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+          rel="stylesheet">
+
+    <style>
+        body {
+            background: #f4f7fb;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        .main-card {
+            max-width: 950px;
+            margin: 35px auto;
+            border: none;
+            border-radius: 18px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .09);
+        }
+
+        .card-header {
+            border-radius: 18px 18px 0 0 !important;
+            padding: 20px 24px;
+        }
+
+        .section-box {
+            background: #f8f9fa;
+            border: 1px solid #e2e6ea;
+            border-radius: 12px;
+            padding: 18px;
+            height: 100%;
+        }
+
+        .result-box {
+            background: #eef6ff;
+            border-left: 5px solid #0d6efd;
+            border-radius: 10px;
+            padding: 18px;
+            white-space: pre-wrap;
+        }
+
+        .tarifa-info {
+            display: none;
+            margin-top: 12px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="card main-card">
+
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-1">
+                    <i class="bi bi-tags-fill"></i>
+                    Categorizar Cliente
+                </h3>
+
+                <small>
+                    Asignación de categoría tarifaria según el resultado del levantamiento.
+                </small>
+            </div>
+
+            <div class="card-body p-4">
+
+                @if (trabajo == null)
+                {
+                    <div class="alert alert-danger">
+                        No se encontró el levantamiento solicitado.
+                    </div>
+                }
+                else
+                {
+                    <div class="row g-3 mb-4">
+
+                        <div class="col-md-6">
+                            <div class="section-box">
+                                <h5 class="mb-3">
+                                    <i class="bi bi-person-fill"></i>
+                                    Datos del cliente
+                                </h5>
+
+                                <p>
+                                    <strong>Nombre:</strong>
+                                    @trabajo.SolicitudServicio.Cliente.Usuario.NombreUsuario
+                                </p>
+
+                                <p>
+                                    <strong>Documento:</strong>
+                                    @trabajo.SolicitudServicio.Cliente.CedulaPasaporteRnc
+                                </p>
+
+                                <p>
+                                    <strong>Teléfono:</strong>
+                                    @trabajo.SolicitudServicio.Cliente.Telefono
+                                </p>
+
+                                <p class="mb-0">
+                                    <strong>Dirección:</strong>
+                                    @trabajo.SolicitudServicio.Cliente.Direccion,
+                                    @trabajo.SolicitudServicio.Cliente.Municipio,
+                                    @trabajo.SolicitudServicio.Cliente.Provincia
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="section-box">
+                                <h5 class="mb-3">
+                                    <i class="bi bi-clipboard-check-fill"></i>
+                                    Datos del levantamiento
+                                </h5>
+
+                                <p>
+                                    <strong>Solicitud:</strong>
+                                    #@trabajo.IdSolicitud
+                                </p>
+
+                                <p>
+                                    <strong>Técnico:</strong>
+                                    @trabajo.Tecnico?.NombreUsuario
+                                </p>
+
+                                <p>
+                                    <strong>Fecha finalización:</strong>
+                                    @(trabajo.FechaFinalizacion?.ToString("dd/MM/yyyy HH:mm") ?? "No registrada")
+                                </p>
+
+                                <p class="mb-0">
+                                    <strong>Estado:</strong>
+                                    <span class="badge bg-success">@trabajo.Estado</span>
+                                </p>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="mb-4">
+                        <h5>
+                            <i class="bi bi-file-earmark-text"></i>
+                            Resultado técnico
+                        </h5>
+
+                        <div class="result-box">
+                            @(string.IsNullOrWhiteSpace(trabajo.Resultado)
+                                                    ? "El técnico no registró un resultado."
+                                                    : trabajo.Resultado)
+                    </div>
+                </div>
+
+                @if (tarifas == null || !tarifas.Any())
+                    {
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            No existen tarifas registradas. Debes registrar al menos una tarifa antes de categorizar al cliente.
+                        </div>
+
+                        <a asp-action="Solicitudes" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i>
+                            Volver
+                        </a>
+                    }
+                    else
+                    {
+                        <form asp-action="CategorizarCliente" method="post">
+
+                            <input type="hidden"
+                                   name="idSolicitud"
+                                   value="@trabajo.IdSolicitud" />
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">
+                                    Categoría tarifaria
+                                </label>
+
+                                <select name="idTarifa"
+                                        id="idTarifa"
+                                        class="form-select"
+                                        required
+                                        onchange="mostrarTarifa()">
+
+                                    <option value="">Seleccione una categoría...</option>
+
+                                    @foreach (var tarifa in tarifas)
+                                    {
+                                        <option value="@tarifa.IdTarifa"
+                                                data-descripcion="@tarifa.Descripcion"
+                                                data-monto="@tarifa.Monto">
+                                            @tarifa.Descripcion
+                                        </option>
+                                    }
+                                </select>
+
+                                <div id="tarifaInfo"
+                                     class="alert alert-info tarifa-info">
+                                    <strong>Categoría:</strong>
+                                    <span id="descripcionTarifa"></span>
+
+                                    <br />
+
+                                    <strong>Monto:</strong>
+                                    RD$ <span id="montoTarifa"></span>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2">
+
+                                <button type="submit"
+                                        class="btn btn-success"
+                                        onclick="return confirm('¿Deseas guardar esta categoría para el cliente?');">
+
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    Guardar categoría
+                                </button>
+
+                                <a asp-action="ResultadoLevantamiento"
+                                   asp-route-id="@trabajo.IdSolicitud"
+                                   class="btn btn-secondary">
+
+                                    <i class="bi bi-arrow-left"></i>
+                                    Volver
+                                </a>
+
+                            </div>
+
+                        </form>
+                    }
+                }
+
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function mostrarTarifa() {
+            const select = document.getElementById("idTarifa");
+            const option = select.options[select.selectedIndex];
+            const info = document.getElementById("tarifaInfo");
+
+            if (!option.value) {
+                info.style.display = "none";
+                return;
+            }
+
+            document.getElementById("descripcionTarifa").textContent =
+                option.getAttribute("data-descripcion");
+
+            const monto = parseFloat(option.getAttribute("data-monto"));
+
+            document.getElementById("montoTarifa").textContent =
+                monto.toLocaleString("es-DO", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+
+            info.style.display = "block";
+        }
+    </script>
+
+</body>
+</html>
+

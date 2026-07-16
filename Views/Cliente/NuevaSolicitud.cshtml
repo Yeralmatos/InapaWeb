@@ -1,0 +1,131 @@
+﻿@model InapaWeb.Models.SolicitudServicio
+
+@{
+    ViewData["Title"] = "Solicitar servicio";
+    Layout = "~/Views/Shared/_ClienteLayout.cshtml";
+}
+
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+    <meta charset="utf-8" />
+
+    <title>Nueva Solicitud</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+
+        body {
+            background: #f4f7fb;
+            font-family: 'Segoe UI';
+        }
+
+        .card {
+            max-width: 850px;
+            margin: 40px auto;
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0,0,0,.08);
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="card">
+
+        <div class="card-header bg-primary text-white">
+
+            <h3>
+
+                <i class="bi bi-clipboard-plus"></i>
+
+                Nueva Solicitud de Servicio
+
+            </h3>
+
+        </div>
+
+        <div class="card-body">
+
+            <form asp-action="NuevaSolicitud" method="post">
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+
+                        Tipo de Solicitud
+
+                    </label>
+
+                    <select asp-for="TipoSolicitud" class="form-select">
+
+                        <option value="">Seleccione...</option>
+
+                        <option>Nueva Instalación</option>
+
+                        <option>Reconexión del Servicio</option>
+
+                        <option>Traslado de Servicio</option>
+
+                        <option>Cambio de Titular</option>
+
+                        <option>Cambio de Categoría Tarifaria</option>
+
+                        <option>Inspección Técnica</option>
+
+                        <option>Otro</option>
+
+                    </select>
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+
+                        Descripción
+
+                    </label>
+
+<textarea asp-for="Descripcion"
+          class="form-control"
+          rows="6"
+          placeholder="Explique detalladamente su solicitud..."></textarea>
+
+                </div>
+
+                <div class="text-end">
+
+                    <a href="/Cliente/Index" class="btn btn-secondary">
+
+                        Cancelar
+
+                    </a>
+
+                    <button class="btn btn-primary">
+
+                        <i class="bi bi-send"></i>
+
+                        Enviar Solicitud
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,390 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <title>INAPA - Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f4f6f9;
+        }
+
+        .container-login {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .left {
+            width: 50%;
+            background: url('/images/inapa-bg.jpg') center/cover no-repeat;
+            position: relative;
+            color: white;
+        }
+
+        .left-overlay {
+            background: linear-gradient(90deg, rgba(0, 43, 96, .92), rgba(0, 43, 96, .76));
+            height: 100vh;
+            padding: 22px 45px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .logo-area {
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .logo {
+            width: 125px;
+            height: 125px;
+        }
+
+        .title {
+            font-size: 56px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            line-height: 1;
+            color: white;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            margin-top: 8px;
+            color: white;
+            max-width: 720px;
+        }
+
+        .line {
+            width: 130px;
+            height: 4px;
+            background: #2f8cff;
+            margin: 16px 0;
+            border-radius: 10px;
+        }
+
+        .system {
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .system2 {
+            font-size: 15px;
+            margin-top: 4px;
+            color: white;
+        }
+
+        .slogan {
+            margin-top: 6px;
+            font-size: 14px;
+            color: #dbeafe;
+            max-width: 520px;
+        }
+
+        .features {
+            margin-top: 22px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .feature {
+            flex: 1;
+            text-align: center;
+            background: rgba(255,255,255,.11);
+            border: 1px solid rgba(255,255,255,.18);
+            color: white;
+            padding: 12px 10px;
+            border-radius: 16px;
+            min-height: 105px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            font-size: 14px;
+            line-height: 1.3;
+        }
+
+            .feature i {
+                font-size: 25px;
+                color: #4ea1ff;
+                margin-bottom: 7px;
+            }
+
+        .footer {
+            position: absolute;
+            bottom: 12px;
+            left: 45px;
+            color: white;
+            font-size: 12px;
+            opacity: .85;
+        }
+
+        .right {
+            width: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(180deg, #ffffff, #f8fbff);
+        }
+
+        .box {
+            width: 420px;
+            padding: 30px 38px;
+            background: white;
+            border-radius: 22px;
+            box-shadow: 0 18px 45px rgba(0,0,0,.10);
+            border: 1px solid #eef2f7;
+        }
+
+        .icon {
+            width: 70px;
+            height: 70px;
+            background: #e8f2ff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: auto;
+            font-size: 34px;
+            color: #0d6efd;
+        }
+
+        
+
+        label {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .form-control {
+            height: 43px;
+        }
+
+        .input-group-text {
+            background: #f8fafc;
+        }
+
+        .eye {
+            cursor: pointer;
+        }
+
+        .btn-login {
+            width: 100%;
+            background: #0d6efd;
+            color: white;
+            border: none;
+            padding: 10px;
+            font-weight: 600;
+            border-radius: 8px;
+        }
+
+            .btn-login:hover {
+                background: #0b5ed7;
+                color: white;
+            }
+
+        .box {
+            width: 420px;
+            padding: 35px 40px;
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 10px 35px rgba(0,0,0,.08);
+            border: 1px solid #e9eef5;
+        }
+
+        a {
+            font-size: 14px;
+            text-decoration: none;
+        }
+
+        @@media (max-width: 900px) {
+            .container-login {
+                flex-direction: column;
+                height: auto;
+                overflow: auto;
+            }
+
+            .left,
+            .right {
+                width: 100%;
+            }
+
+            .left-overlay {
+                height: auto;
+                min-height: 100vh;
+                padding: 30px;
+            }
+
+            .title {
+                font-size: 48px;
+            }
+
+            .features {
+                flex-direction: column;
+            }
+
+            .footer {
+                position: static;
+                margin-top: 25px;
+            }
+
+            .box {
+                width: 90%;
+                margin: 35px 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container-login">
+
+        <div class="left">
+            <div class="left-overlay">
+
+                <div class="logo-area">
+                    <img src="/images/inapa-logo.png?v=1002" class="logo" alt="Logo INAPA" />
+                </div>
+
+                <div class="title">INAPA</div>
+
+                <div class="subtitle">
+                    INSTITUTO NACIONAL DE AGUAS POTABLES Y ALCANTARILLADOS
+                </div>
+
+                <div class="line"></div>
+                <div class="system">Portal de Gestión de Servicios</div>
+                <div class="system2">Gestión de Clientes y Servicios</div>
+                <div class="slogan">
+                    Plataforma digital para la administración y gestión de servicios de agua potable.
+                </div>
+
+                <div class="features">
+                    <div class="feature">
+                        <i class="bi bi-person-check-fill"></i>
+                        <span>Atención eficiente<br />al ciudadano</span>
+                    </div>
+
+                    <div class="feature">
+                        <i class="bi bi-shield-lock-fill"></i>
+                        <span>Información segura<br />y confiable</span>
+                    </div>
+
+                    <div class="feature">
+                        <i class="bi bi-graph-up-arrow"></i>
+                        <span>Gestión y control<br />en tiempo real</span>
+                    </div>
+                </div>
+
+                <div class="footer">
+                    © 2026 INAPA - Todos los derechos reservados
+                </div>
+
+            </div>
+        </div>
+
+        <div class="right">
+            <div class="box">
+
+                <div class="icon">
+                    <i class="bi bi-lock-fill"></i>
+                </div>
+
+                <h3 class="text-center mt-3">Iniciar Sesión</h3>
+                <p class="text-center text-muted mb-4">
+                    Ingresa tus credenciales para acceder al sistema
+                </p>
+
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger text-center py-2">
+                        @ViewBag.Error
+                    </div>
+                }
+
+                <form asp-action="Login" method="post">
+
+                    <label>Correo electrónico</label>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                        <input type="email" name="correo" class="form-control" placeholder="ejemplo@inapa.gob.do" required />
+                    </div>
+
+                    <label>Contraseña</label>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                        <input type="password" id="pass" name="contrasena" class="form-control" placeholder="Ingresa tu contraseña" required />
+                        <span class="input-group-text eye" onclick="toggle()">
+                            <i id="icon" class="bi bi-eye"></i>
+                        </span>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <input type="checkbox" /> Recordarme
+                        </div>
+                        <a href="#">¿Olvidaste tu contraseña?</a>
+                    </div>
+
+                    <button type="submit" class="btn btn-login">
+                        Iniciar Sesión
+                    </button>
+
+                </form>
+
+                <hr />
+
+                <div class="d-grid gap-2 mt-3">
+
+                    <a asp-controller="Acceso"
+                       asp-action="RegistroCliente"
+                       class="btn btn-outline-primary">
+
+                        <i class="bi bi-person-plus-fill"></i>
+                        Crear cuenta
+
+                    </a>
+
+                    <a asp-controller="Acceso"
+                       asp-action="OlvidoContrasena"
+                       class="text-center">
+ 
+
+                    </a>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function toggle() {
+            var p = document.getElementById("pass");
+            var i = document.getElementById("icon");
+
+            if (p.type === "password") {
+                p.type = "text";
+                i.className = "bi bi-eye-slash";
+            } else {
+                p.type = "password";
+                i.className = "bi bi-eye";
+            }
+        }
+    </script>
+
+</body>
+</html>
