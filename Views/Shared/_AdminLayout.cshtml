@@ -1,0 +1,411 @@
+﻿@{
+    var nombreUsuario =
+        Context.Session.GetString("NombreUsuario")
+        ?? "Administrador";
+
+    var controladorActual =
+        ViewContext.RouteData.Values["controller"]?.ToString();
+
+    var accionActual =
+        ViewContext.RouteData.Values["action"]?.ToString();
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1" />
+
+    <title>@ViewData["Title"] - INAPA</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet" />
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+          rel="stylesheet" />
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f4f7fb;
+            color: #071b45;
+        }
+
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .admin-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            width: 270px;
+            height: 100vh;
+            padding: 22px 18px;
+            overflow-y: auto;
+            color: white;
+            background: linear-gradient(180deg, #003b82, #001f4d);
+        }
+
+        .admin-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+            .admin-brand img {
+                width: 65px;
+                height: 65px;
+                object-fit: contain;
+            }
+
+            .admin-brand h2 {
+                margin: 0;
+                font-size: 28px;
+                font-weight: 800;
+            }
+
+            .admin-brand small {
+                font-size: 11px;
+                line-height: 1.5;
+            }
+
+        .admin-menu a {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 7px;
+            padding: 13px 14px;
+            border-radius: 10px;
+            color: white;
+            font-size: 15px;
+            text-decoration: none;
+            transition: background .2s ease;
+        }
+
+            .admin-menu a:hover,
+            .admin-menu a.active {
+                color: white;
+                background: #0d6efd;
+            }
+
+        .admin-menu i {
+            width: 24px;
+            font-size: 21px;
+            text-align: center;
+        }
+
+        .admin-main {
+            display: flex;
+            flex-direction: column;
+            width: calc(100% - 270px);
+            min-height: 100vh;
+            margin-left: 270px;
+        }
+
+        .admin-topbar {
+            position: sticky;
+            top: 0;
+            z-index: 900;
+            min-height: 76px;
+            padding: 12px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            border-bottom: 1px solid #e0e6ef;
+        }
+
+            .admin-topbar h1 {
+                margin: 0;
+                font-size: 24px;
+                font-weight: 700;
+            }
+
+        .admin-user-box {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .admin-avatar {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            border-radius: 50%;
+            background: #003b82;
+            color: white;
+            font-size: 27px;
+        }
+
+        .admin-content {
+            flex: 1;
+            padding: 26px 32px;
+        }
+
+        .admin-footer {
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            background: white;
+            border-top: 1px solid #e0e6ef;
+            color: #52627a;
+            font-size: 13px;
+        }
+
+        @@media (max-width: 900px) {
+            .admin-sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+            }
+
+            .admin-layout {
+                display: block;
+            }
+
+            .admin-main {
+                width: 100%;
+                margin-left: 0;
+            }
+
+            .admin-topbar {
+                position: relative;
+            }
+        }
+
+        @@media (max-width: 576px) {
+            .admin-topbar {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 14px;
+                padding: 18px;
+            }
+
+            .admin-content {
+                padding: 20px 15px;
+            }
+
+            .admin-footer {
+                flex-direction: column;
+                padding: 15px;
+            }
+        }
+    </style>
+
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+
+<body>
+
+    <div class="admin-layout">
+
+        <aside class="admin-sidebar">
+
+            <div class="admin-brand">
+
+                <img src="/images/inapa-logo.png"
+                     alt="Logo INAPA" />
+
+                <div>
+                    <h2>INAPA</h2>
+
+                    <small>
+                        Instituto Nacional de Aguas<br />
+                        Potables y Alcantarillados
+                    </small>
+                </div>
+
+            </div>
+
+            <nav class="admin-menu">
+
+                <a asp-controller="Admin"
+                   asp-action="Index"
+                   class="@(accionActual == "Index" ? "active" : "")">
+
+                    <i class="bi bi-house-door-fill"></i>
+                    Inicio
+                </a>
+
+                <a asp-controller="Admin"
+                   asp-action="Usuarios"
+                   class="@(accionActual == "Usuarios" ||
+                                            accionActual == "CrearUsuario" ||
+                                            accionActual == "DetalleUsuario" ||
+                                            accionActual == "EditarUsuario"
+                                            ? "active"
+                                            : "")">
+
+                    <i class="bi bi-people-fill"></i>
+                    Usuarios
+                </a>
+
+                <a asp-controller="Admin"
+                   asp-action="Solicitudes"
+                   class="@(accionActual == "Solicitudes" ||
+                                            accionActual == "DetalleSolicitud"
+                                            ? "active"
+                                            : "")">
+
+                    <i class="bi bi-clipboard2-check-fill"></i>
+                    Solicitudes de Servicio
+                </a>
+
+                <a asp-controller="Admin"
+                   asp-action="SolicitudesContrato"
+                   class="@(accionActual == "SolicitudesContrato"
+                                            ? "active"
+                                            : "")">
+
+                    <i class="bi bi-file-earmark-person-fill"></i>
+                    Solicitudes de Contrato
+                </a>
+
+                <a asp-controller="Admin"
+                   asp-action="Contratos"
+                   class="@(accionActual == "Contratos" ||
+                                            accionActual == "GenerarContrato"
+                                            ? "active"
+                                            : "")">
+
+                    <i class="bi bi-file-earmark-text-fill"></i>
+                    Contratos
+                </a>
+
+                <a asp-controller="Admin"
+                   asp-action="Traslados">
+
+                    <i class="bi bi-truck"></i>
+                    Traslados de Servicio
+                </a>
+
+                <a asp-controller="Admin"
+                   asp-action="Asignaciones">
+
+                    <i class="bi bi-person-gear"></i>
+                    Asignaciones Técnicas
+                </a>
+
+                <a asp-controller="Admin"
+                   asp-action="Averias">
+
+                    <i class="bi bi-tools"></i>
+                    Averías
+                </a>
+
+                <a asp-controller="Admin"
+                   asp-action="Reclamaciones">
+
+                    <i class="bi bi-chat-dots-fill"></i>
+                    Reclamaciones
+                </a>
+
+                <a asp-controller="Admin"
+                   asp-action="Tarifas">
+
+                    <i class="bi bi-cash-coin"></i>
+                    Tarifas y Categorías
+                </a>
+
+                <a asp-controller="Admin"
+                   asp-action="Facturas">
+
+                    <i class="bi bi-receipt"></i>
+                    Facturación y Pagos
+                </a>
+
+                <a asp-controller="Admin"
+                   asp-action="Reportes">
+
+                    <i class="bi bi-file-earmark-bar-graph-fill"></i>
+                    Reportes
+                </a>
+
+                <a asp-controller="Admin"
+                   asp-action="Estadisticas">
+
+                    <i class="bi bi-bar-chart-fill"></i>
+                    Estadísticas
+                </a>
+
+                <a asp-controller="Admin"
+                   asp-action="RolesPermisos">
+
+                    <i class="bi bi-gear-fill"></i>
+                    Roles y Permisos
+                </a>
+
+                <a asp-controller="Acceso"
+                   asp-action="CerrarSesion">
+
+                    <i class="bi bi-box-arrow-left"></i>
+                    Cerrar Sesión
+                </a>
+
+            </nav>
+
+        </aside>
+
+        <main class="admin-main">
+
+            <header class="admin-topbar">
+
+                <h1>
+                    <i class="bi bi-list"></i>
+                    @ViewData["Title"]
+                </h1>
+
+                <div class="admin-user-box">
+
+                    <div class="admin-avatar">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+
+                    <div>
+                        <strong>@nombreUsuario</strong><br />
+                        <small>Administrador</small>
+                    </div>
+
+                </div>
+
+            </header>
+
+            <section class="admin-content">
+                @RenderBody()
+            </section>
+
+            <footer class="admin-footer">
+
+                <span>
+                    © 2026 INAPA - Instituto Nacional de Aguas Potables y Alcantarillados.
+                </span>
+
+                <span>Versión 1.0.0</span>
+
+            </footer>
+
+        </main>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>

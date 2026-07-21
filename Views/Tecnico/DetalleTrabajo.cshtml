@@ -1,121 +1,1315 @@
 ﻿@model InapaWeb.Models.AsignacionTecnico
 
 @{
+    ViewData["Title"] = "Detalle del trabajo";
     Layout = null;
+
+    string nombreCliente =
+        Model.SolicitudServicio?.Cliente?.Usuario?.NombreUsuario
+        ?? "Cliente no disponible";
+
+    string correoCliente =
+        Model.SolicitudServicio?.Cliente?.Usuario?.Correo
+        ?? "No disponible";
+
+    string direccionCliente =
+        Model.SolicitudServicio?.Cliente?.Direccion
+        ?? "No disponible";
+
+    string telefonoCliente =
+        Model.SolicitudServicio?.Cliente?.Telefono
+        ?? "No disponible";
+
+    string tipoSolicitud =
+        Model.SolicitudServicio?.TipoSolicitud
+        ?? "No disponible";
+
+    string descripcionSolicitud =
+        Model.SolicitudServicio?.Descripcion
+        ?? "Sin descripción";
+
+    bool estaAsignado =
+        Model.Estado == "Asignado";
+
+    bool estaEnProceso =
+        Model.Estado == "En Proceso";
+
+    bool estaFinalizado =
+        Model.Estado == "Finalizado";
 }
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
 
     <meta charset="utf-8" />
 
-    <title>Detalle del Trabajo</title>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1" />
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <title>Detalle del trabajo - INAPA</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet" />
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+          rel="stylesheet" />
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #f3f6fb;
+            font-family: "Segoe UI", Arial, sans-serif;
+            color: #14213d;
+        }
+
+        .pagina {
+            width: 100%;
+            min-height: 100vh;
+            padding: 32px;
+        }
+
+        .contenedor {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .encabezado {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 24px;
+            padding: 28px 32px;
+            border-radius: 20px;
+            color: white;
+            background: linear-gradient(120deg, #1687ed, #142b8f);
+            box-shadow: 0 15px 35px rgba(24, 71, 171, .18);
+        }
+
+        .encabezado-titulo {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .encabezado-icono {
+            width: 58px;
+            height: 58px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, .16);
+            font-size: 28px;
+        }
+
+        .encabezado h1 {
+            margin: 0;
+            font-size: 30px;
+            font-weight: 800;
+        }
+
+        .encabezado p {
+            margin: 5px 0 0;
+            color: rgba(255, 255, 255, .85);
+        }
+
+        .btn-volver {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 11px 18px;
+            border: none;
+            border-radius: 11px;
+            background: white;
+            color: #173d95;
+            font-weight: 700;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .btn-volver:hover {
+            background: #eef4ff;
+            color: #0f2f78;
+        }
+
+        .alerta {
+            border: none;
+            border-radius: 13px;
+            padding: 15px 18px;
+            font-weight: 600;
+        }
+
+        .estado-general {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 24px;
+            padding: 22px;
+            border-radius: 18px;
+            background: white;
+            box-shadow: 0 9px 28px rgba(31, 51, 92, .08);
+        }
+
+        .estado-general h2 {
+            margin: 0 0 5px;
+            font-size: 21px;
+            font-weight: 800;
+        }
+
+        .estado-general p {
+            margin: 0;
+            color: #75809a;
+        }
+
+        .estado-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 10px 17px;
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .estado-asignado {
+            background: #fff3d3;
+            color: #996800;
+        }
+
+        .estado-proceso {
+            background: #dcecff;
+            color: #145fa8;
+        }
+
+        .estado-finalizado {
+            background: #dff6e8;
+            color: #167443;
+        }
+
+        .estado-otro {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .rejilla {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 22px;
+            margin-bottom: 24px;
+        }
+
+        .tarjeta,
+        .seccion-acciones {
+            overflow: hidden;
+            border-radius: 18px;
+            background: white;
+            box-shadow: 0 9px 28px rgba(31, 51, 92, .08);
+        }
+
+        .seccion-acciones {
+            margin-bottom: 30px;
+        }
+
+        .tarjeta-cabecera {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 20px 23px;
+            border-bottom: 1px solid #e9edf5;
+        }
+
+        .tarjeta-cabecera i {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 11px;
+            background: #e8f2ff;
+            color: #176aca;
+            font-size: 19px;
+        }
+
+        .tarjeta-cabecera h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .tarjeta-cuerpo {
+            padding: 23px;
+        }
+
+        .dato {
+            display: grid;
+            grid-template-columns: 155px 1fr;
+            gap: 14px;
+            padding: 12px 0;
+            border-bottom: 1px solid #edf0f5;
+        }
+
+        .dato:last-child {
+            border-bottom: none;
+        }
+
+        .dato-etiqueta {
+            color: #788399;
+            font-weight: 600;
+        }
+
+        .dato-valor {
+            color: #16213e;
+            font-weight: 700;
+            word-break: break-word;
+        }
+
+        .codigo {
+            color: #1558b5;
+            font-weight: 900;
+        }
+
+        .form-label {
+            margin-bottom: 8px;
+            color: #273450;
+            font-weight: 700;
+        }
+
+        .form-control {
+            padding: 12px 14px;
+            border: 1px solid #d9e0ec;
+            border-radius: 11px;
+        }
+
+        .form-control:focus {
+            border-color: #2482df;
+            box-shadow: 0 0 0 4px rgba(36, 130, 223, .12);
+        }
+
+        textarea.form-control {
+            min-height: 125px;
+            resize: vertical;
+        }
+
+        .contador {
+            display: block;
+            margin-top: 6px;
+            color: #778196;
+            font-size: 13px;
+            text-align: right;
+        }
+
+        .evidencias-box {
+            margin-top: 8px;
+            padding: 22px;
+            border: 1px solid #dce4ef;
+            border-radius: 15px;
+            background: #f8faff;
+        }
+
+        .evidencias-titulo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            color: #183c78;
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .evidencias-ayuda {
+            margin-bottom: 20px;
+            color: #68758d;
+        }
+
+        .archivo-campo {
+            margin-bottom: 18px;
+        }
+
+        .archivo-campo:last-child {
+            margin-bottom: 0;
+        }
+
+        .archivo-campo small {
+            display: block;
+            margin-top: 6px;
+            color: #79849a;
+        }
+
+        .requerido {
+            color: #dc3545;
+            font-weight: 800;
+        }
+
+        .vista-previa-contenedor {
+            display: none;
+            margin-top: 12px;
+        }
+
+        .vista-previa {
+            width: 100%;
+            max-width: 260px;
+            height: 180px;
+            border: 1px solid #d8e0eb;
+            border-radius: 12px;
+            object-fit: cover;
+            background: white;
+        }
+
+        .botones {
+            display: flex;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 22px;
+        }
+
+        .btn-accion {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 11px;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .btn-iniciar {
+            background: #1478db;
+            color: white;
+        }
+
+        .btn-iniciar:hover {
+            background: #0d65bf;
+            color: white;
+        }
+
+        .btn-finalizar {
+            background: #16834c;
+            color: white;
+        }
+
+        .btn-finalizar:hover {
+            background: #106d3e;
+            color: white;
+        }
+
+        .btn-finalizar:disabled {
+            cursor: not-allowed;
+            opacity: .7;
+        }
+
+        .btn-cancelar {
+            border: 1px solid #cdd5df;
+            background: white;
+            color: #596579;
+        }
+
+        .btn-cancelar:hover {
+            background: #f1f3f6;
+            color: #364153;
+        }
+
+        .finalizado-box {
+            padding: 20px;
+            border: 1px solid #c8ead6;
+            border-radius: 14px;
+            background: #effaf3;
+        }
+
+        .finalizado-box h4 {
+            margin-bottom: 16px;
+            color: #146b3e;
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .evidencias-guardadas {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #c8ead6;
+        }
+
+        .evidencias-guardadas h5 {
+            margin-bottom: 16px;
+            color: #146b3e;
+            font-weight: 800;
+        }
+
+        .galeria {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .evidencia {
+            overflow: hidden;
+            border: 1px solid #c8ead6;
+            border-radius: 13px;
+            background: white;
+        }
+
+        .evidencia img {
+            width: 100%;
+            height: 210px;
+            display: block;
+            object-fit: cover;
+        }
+
+        .evidencia-pie {
+            padding: 11px;
+            text-align: center;
+        }
+
+        .evidencia-pie a {
+            color: #176aca;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .evidencia-pie a:hover {
+            text-decoration: underline;
+        }
+
+        @@media (max-width: 850px) {
+            .pagina {
+                padding: 18px;
+            }
+
+            .encabezado {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .rejilla {
+                grid-template-columns: 1fr;
+            }
+
+            .estado-general {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .btn-volver {
+                width: 100%;
+            }
+
+            .galeria {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @@media (max-width: 520px) {
+            .dato {
+                grid-template-columns: 1fr;
+                gap: 4px;
+            }
+
+            .encabezado h1 {
+                font-size: 24px;
+            }
+
+            .botones {
+                flex-direction: column;
+            }
+
+            .btn-accion {
+                width: 100%;
+            }
+
+            .galeria {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 
 </head>
 
-<body class="bg-light">
+<body>
 
-    <div class="container mt-4">
+    <div class="pagina">
 
-        <div class="card shadow">
+        <div class="contenedor">
 
-            <div class="card-header bg-primary text-white">
+            <header class="encabezado">
 
-                <h3>
+                <div class="encabezado-titulo">
+
+                    <div class="encabezado-icono">
+                        <i class="bi bi-clipboard2-check"></i>
+                    </div>
+
+                    <div>
+                        <h1>Detalle del trabajo</h1>
+
+                        <p>
+                            Consulta los datos e informa el resultado del levantamiento.
+                        </p>
+                    </div>
+
+                </div>
+
+                <a asp-controller="Tecnico"
+                   asp-action="TrabajosAsignados"
+                   class="btn-volver">
+
+                    <i class="bi bi-arrow-left"></i>
+                    Volver a trabajos
+
+                </a>
+
+            </header>
+
+            @if (TempData["Exito"] != null)
+            {
+                <div class="alert alert-success alerta">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    @TempData["Exito"]
+                </div>
+            }
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alerta">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    @TempData["Error"]
+                </div>
+            }
+
+            <section class="estado-general">
+
+                <div>
+
+                    <h2>
+                        Trabajo #@Model.IdAsignacion
+                    </h2>
+
+                    <p>
+                        Asignado el
+                        @Model.FechaAsignacion.ToString("dd/MM/yyyy")
+                        a las
+                        @Model.FechaAsignacion.ToString("hh:mm tt")
+                    </p>
+
+                </div>
+
+                @if (estaAsignado)
+                {
+                    <span class="estado-badge estado-asignado">
+                        <i class="bi bi-hourglass-split"></i>
+                        Pendiente
+                    </span>
+                }
+                else if (estaEnProceso)
+                {
+                    <span class="estado-badge estado-proceso">
+                        <i class="bi bi-arrow-repeat"></i>
+                        En proceso
+                    </span>
+                }
+                else if (estaFinalizado)
+                {
+                    <span class="estado-badge estado-finalizado">
+                        <i class="bi bi-check-circle-fill"></i>
+                        Finalizado
+                    </span>
+                }
+                else
+                {
+                    <span class="estado-badge estado-otro">
+                        <i class="bi bi-info-circle"></i>
+                        @Model.Estado
+                    </span>
+                }
+
+            </section>
+
+            <div class="rejilla">
+
+                <section class="tarjeta">
+
+                    <div class="tarjeta-cabecera">
+                        <i class="bi bi-clipboard-data"></i>
+                        <h3>Información del trabajo</h3>
+                    </div>
+
+                    <div class="tarjeta-cuerpo">
+
+                        <div class="dato">
+                            <div class="dato-etiqueta">
+                                Solicitud
+                            </div>
+
+                            <div class="dato-valor codigo">
+                                SOL-@Model.IdSolicitud.ToString("D5")
+                            </div>
+                        </div>
+
+                        <div class="dato">
+                            <div class="dato-etiqueta">
+                                Tipo de trabajo
+                            </div>
+
+                            <div class="dato-valor">
+                                @(string.IsNullOrWhiteSpace(Model.TipoTrabajo)
+                                                                ? "Trabajo técnico"
+                                                                : Model.TipoTrabajo)
+                            </div>
+                        </div>
+
+                        <div class="dato">
+                            <div class="dato-etiqueta">
+                                Fecha asignada
+                            </div>
+
+                            <div class="dato-valor">
+                                @Model.FechaAsignacion.ToString("dd/MM/yyyy hh:mm tt")
+                            </div>
+                        </div>
+
+                        <div class="dato">
+                            <div class="dato-etiqueta">
+                                Estado
+                            </div>
+
+                            <div class="dato-valor">
+                                @Model.Estado
+                            </div>
+                        </div>
+
+                        <div class="dato">
+                            <div class="dato-etiqueta">
+                                Tipo de solicitud
+                            </div>
+
+                            <div class="dato-valor">
+                                @tipoSolicitud
+                            </div>
+                        </div>
+
+                        <div class="dato">
+                            <div class="dato-etiqueta">
+                                Descripción
+                            </div>
+
+                            <div class="dato-valor">
+                                @descripcionSolicitud
+                            </div>
+                        </div>
+
+                    </div>
+
+                </section>
+
+                <section class="tarjeta">
+
+                    <div class="tarjeta-cabecera">
+                        <i class="bi bi-person"></i>
+                        <h3>Información del cliente</h3>
+                    </div>
+
+                    <div class="tarjeta-cuerpo">
+
+                        <div class="dato">
+                            <div class="dato-etiqueta">
+                                Nombre
+                            </div>
+
+                            <div class="dato-valor">
+                                @nombreCliente
+                            </div>
+                        </div>
+
+                        <div class="dato">
+                            <div class="dato-etiqueta">
+                                Teléfono
+                            </div>
+
+                            <div class="dato-valor">
+                                @telefonoCliente
+                            </div>
+                        </div>
+
+                        <div class="dato">
+                            <div class="dato-etiqueta">
+                                Correo
+                            </div>
+
+                            <div class="dato-valor">
+                                @correoCliente
+                            </div>
+                        </div>
+
+                        <div class="dato">
+                            <div class="dato-etiqueta">
+                                Dirección
+                            </div>
+
+                            <div class="dato-valor">
+                                @direccionCliente
+                            </div>
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </div>
+
+            <section class="seccion-acciones">
+
+                <div class="tarjeta-cabecera">
                     <i class="bi bi-tools"></i>
-                    Detalle del Trabajo
-                </h3>
+                    <h3>Gestión del trabajo</h3>
+                </div>
 
-            </div>
+                <div class="tarjeta-cuerpo">
 
-            <div class="card-body">
+                    @if (estaAsignado)
+                    {
+                        <div class="alert alert-warning alerta">
 
-                <div class="row">
+                            <i class="bi bi-info-circle-fill me-2"></i>
 
-                    <div class="col-md-6">
+                            Este trabajo todavía no ha sido iniciado.
+                            Presiona <strong>Iniciar trabajo</strong> para comenzar.
 
-                        <p><strong>Cliente:</strong> @Model.SolicitudServicio.Cliente.Usuario.NombreUsuario</p>
+                        </div>
 
-                        <p><strong>Tipo de trabajo:</strong> @Model.TipoTrabajo</p>
+                        <form asp-controller="Tecnico"
+                              asp-action="IniciarTrabajo"
+                              method="post">
 
-                        <p><strong>Fecha asignación:</strong> @Model.FechaAsignacion.ToString("dd/MM/yyyy")</p>
+                            @Html.AntiForgeryToken()
 
-                    </div>
+                            <input type="hidden"
+                                   name="id"
+                                   value="@Model.IdAsignacion" />
 
-                    <div class="col-md-6">
+                            <div class="botones">
 
-                        <p><strong>Estado:</strong> @Model.Estado</p>
+                                <button type="submit"
+                                        class="btn-accion btn-iniciar">
 
-                        <p><strong>Solicitud:</strong> #@Model.IdSolicitud</p>
+                                    <i class="bi bi-play-circle-fill"></i>
+                                    Iniciar trabajo
 
-                    </div>
+                                </button>
+
+                            </div>
+
+                        </form>
+                    }
+                    else if (estaEnProceso)
+                    {
+                        <div class="alert alert-primary alerta">
+
+                            <i class="bi bi-arrow-repeat me-2"></i>
+
+                            El trabajo está en proceso. Registra la observación,
+                            el resultado y al menos una evidencia fotográfica.
+
+                        </div>
+
+                        <form asp-controller="Tecnico"
+                              asp-action="FinalizarTrabajo"
+                              method="post"
+                              enctype="multipart/form-data"
+                              id="formFinalizar">
+
+                            @Html.AntiForgeryToken()
+
+                            <input type="hidden"
+                                   name="id"
+                                   value="@Model.IdAsignacion" />
+
+                            <div class="mb-4">
+
+                                <label for="observacion"
+                                       class="form-label">
+
+                                    Observación del levantamiento
+
+                                </label>
+
+                                <textarea id="observacion"
+                                      name="observacion"
+                                      class="form-control"
+                                      maxlength="300"
+                                      required
+                                      placeholder="Describe las condiciones encontradas durante el levantamiento...">@Model.Observacion</textarea>
+
+                                <span class="contador">
+                                    Máximo 300 caracteres
+                                </span>
+
+                            </div>
+
+                            <div class="mb-4">
+
+                                <label for="resultado"
+                                       class="form-label">
+
+                                    Resultado del levantamiento
+
+                                </label>
+
+                                <textarea id="resultado"
+                                      name="resultado"
+                                      class="form-control"
+                                      maxlength="800"
+                                      required
+                                      placeholder="Indica el resultado y las recomendaciones del trabajo...">@Model.Resultado</textarea>
+
+                                <span class="contador">
+                                    Máximo 800 caracteres
+                                </span>
+
+                            </div>
+
+                            <div class="evidencias-box">
+
+                                <div class="evidencias-titulo">
+                                    <i class="bi bi-camera-fill"></i>
+                                    Evidencias fotográficas
+                                </div>
+
+                                <p class="evidencias-ayuda">
+                                    Debes adjuntar al menos una fotografía.
+                                    Solo se permiten archivos JPG, JPEG o PNG,
+                                    con un máximo de 5 MB por imagen.
+                                </p>
+
+                                <div class="archivo-campo">
+
+                                    <label for="imagen1"
+                                           class="form-label">
+
+                                        Evidencia principal
+                                        <span class="requerido">*</span>
+
+                                    </label>
+
+                                    <input type="file"
+                                           id="imagen1"
+                                           name="imagen1"
+                                           class="form-control"
+                                           accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+                                           required
+                                           onchange="mostrarVistaPrevia(this, 'contenedorVista1', 'vista1')" />
+
+                                    <small>
+                                        Esta fotografía es obligatoria.
+                                    </small>
+
+                                    <div id="contenedorVista1"
+                                         class="vista-previa-contenedor">
+
+                                        <img id="vista1"
+                                             class="vista-previa"
+                                             alt="Vista previa de la evidencia principal" />
+
+                                    </div>
+
+                                </div>
+
+                                <div class="archivo-campo">
+
+                                    <label for="imagen2"
+                                           class="form-label">
+
+                                        Segunda evidencia
+                                        <span class="text-muted">
+                                            (opcional)
+                                        </span>
+
+                                    </label>
+
+                                    <input type="file"
+                                           id="imagen2"
+                                           name="imagen2"
+                                           class="form-control"
+                                           accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+                                           onchange="mostrarVistaPrevia(this, 'contenedorVista2', 'vista2')" />
+
+                                    <div id="contenedorVista2"
+                                         class="vista-previa-contenedor">
+
+                                        <img id="vista2"
+                                             class="vista-previa"
+                                             alt="Vista previa de la segunda evidencia" />
+
+                                    </div>
+
+                                </div>
+
+                                <div class="archivo-campo">
+
+                                    <label for="imagen3"
+                                           class="form-label">
+
+                                        Tercera evidencia
+                                        <span class="text-muted">
+                                            (opcional)
+                                        </span>
+
+                                    </label>
+
+                                    <input type="file"
+                                           id="imagen3"
+                                           name="imagen3"
+                                           class="form-control"
+                                           accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+                                           onchange="mostrarVistaPrevia(this, 'contenedorVista3', 'vista3')" />
+
+                                    <div id="contenedorVista3"
+                                         class="vista-previa-contenedor">
+
+                                        <img id="vista3"
+                                             class="vista-previa"
+                                             alt="Vista previa de la tercera evidencia" />
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="botones">
+
+                                <a asp-controller="Tecnico"
+                                   asp-action="TrabajosAsignados"
+                                   class="btn-accion btn-cancelar">
+
+                                    <i class="bi bi-x-circle"></i>
+                                    Cancelar
+
+                                </a>
+
+                                <button type="submit"
+                                        id="btnFinalizar"
+                                        class="btn-accion btn-finalizar">
+
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    Finalizar trabajo
+
+                                </button>
+
+                            </div>
+
+                        </form>
+                    }
+                    else if (estaFinalizado)
+                    {
+                        <div class="finalizado-box">
+
+                            <h4>
+                                <i class="bi bi-check-circle-fill me-2"></i>
+                                Trabajo finalizado
+                            </h4>
+
+                            <div class="dato">
+
+                                <div class="dato-etiqueta">
+                                    Fecha de finalización
+                                </div>
+
+                                <div class="dato-valor">
+
+                                    @if (Model.FechaFinalizacion.HasValue)
+                                    {
+                                        @Model.FechaFinalizacion.Value.ToString(
+                                        "dd/MM/yyyy hh:mm tt"
+                                                                )
+                                                                }
+                                    else
+                                    {
+                                        <span>No disponible</span>
+                                    }
+
+                            </div>
+
+                        </div>
+
+                        <div class="dato">
+
+                            <div class="dato-etiqueta">
+                                Observación
+                            </div>
+
+                            <div class="dato-valor">
+
+                                @(string.IsNullOrWhiteSpace(Model.Observacion)
+                                                                ? "Sin observación"
+                                                                : Model.Observacion)
+
+                            </div>
+
+                        </div>
+
+                        <div class="dato">
+
+                            <div class="dato-etiqueta">
+                                Resultado
+                            </div>
+
+                            <div class="dato-valor">
+
+                                @(string.IsNullOrWhiteSpace(Model.Resultado)
+                                                                ? "Sin resultado"
+                                                                : Model.Resultado)
+
+                            </div>
+
+                            </div>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.EvidenciaImagen1) ||
+                                                !string.IsNullOrWhiteSpace(Model.EvidenciaImagen2) ||
+                                                !string.IsNullOrWhiteSpace(Model.EvidenciaImagen3))
+                            {
+                                <div class="evidencias-guardadas">
+
+                                    <h5>
+                                        <i class="bi bi-images me-2"></i>
+                                        Evidencias fotográficas
+                                    </h5>
+
+                                    <div class="galeria">
+
+                                        @if (!string.IsNullOrWhiteSpace(Model.EvidenciaImagen1))
+                                        {
+                                            <div class="evidencia">
+
+                                                <a href="@Model.EvidenciaImagen1"
+                                                   target="_blank">
+
+                                                    <img src="@Model.EvidenciaImagen1"
+                                                         alt="Evidencia principal" />
+
+                                                </a>
+
+                                                <div class="evidencia-pie">
+
+                                                    <a href="@Model.EvidenciaImagen1"
+                                                       target="_blank">
+
+                                                        <i class="bi bi-arrows-fullscreen"></i>
+                                                        Ver imagen completa
+
+                                                    </a>
+
+                                                </div>
+
+                                            </div>
+                                        }
+
+                                        @if (!string.IsNullOrWhiteSpace(Model.EvidenciaImagen2))
+                                        {
+                                            <div class="evidencia">
+
+                                                <a href="@Model.EvidenciaImagen2"
+                                                   target="_blank">
+
+                                                    <img src="@Model.EvidenciaImagen2"
+                                                         alt="Segunda evidencia" />
+
+                                                </a>
+
+                                                <div class="evidencia-pie">
+
+                                                    <a href="@Model.EvidenciaImagen2"
+                                                       target="_blank">
+
+                                                        <i class="bi bi-arrows-fullscreen"></i>
+                                                        Ver imagen completa
+
+                                                    </a>
+
+                                                </div>
+
+                                            </div>
+                                        }
+
+                                        @if (!string.IsNullOrWhiteSpace(Model.EvidenciaImagen3))
+                                        {
+                                            <div class="evidencia">
+
+                                                <a href="@Model.EvidenciaImagen3"
+                                                   target="_blank">
+
+                                                    <img src="@Model.EvidenciaImagen3"
+                                                         alt="Tercera evidencia" />
+
+                                                </a>
+
+                                                <div class="evidencia-pie">
+
+                                                    <a href="@Model.EvidenciaImagen3"
+                                                       target="_blank">
+
+                                                        <i class="bi bi-arrows-fullscreen"></i>
+                                                        Ver imagen completa
+
+                                                    </a>
+
+                                                </div>
+
+                                            </div>
+                                        }
+
+                                    </div>
+
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="alert alert-warning mt-4 mb-0">
+                                    Este trabajo fue finalizado sin evidencias registradas.
+                                </div>
+                            }
+
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-secondary alerta">
+
+                            El trabajo tiene el estado:
+                            <strong>@Model.Estado</strong>.
+
+                        </div>
+                    }
 
                 </div>
 
-                <hr />
-
-                <div class="mb-3">
-
-                    <label class="form-label">
-
-                        Descripción de la solicitud
-
-                    </label>
-
-                    <textarea class="form-control"
-                              rows="4"
-                              readonly>@Model.SolicitudServicio.Descripcion</textarea>
-
-                </div>
-
-                <form asp-action="FinalizarTrabajo" method="post">
-
-                    <input type="hidden"
-                           name="idAsignacion"
-                           value="@Model.IdAsignacion" />
-
-                    <div class="mb-3">
-
-                        <label class="form-label">
-
-                            Resultado del levantamiento
-
-                        </label>
-
-                        <textarea name="resultado"
-                                  class="form-control"
-                                  rows="6"
-                                  placeholder="Escriba el resultado del levantamiento realizado..."
-                                  required></textarea>
-
-                    </div>
-
-                    <button class="btn btn-success">
-
-                        <i class="bi bi-check-circle"></i>
-
-                        Finalizar Trabajo
-
-                    </button>
-
-                    <a href="/Tecnico/TrabajosAsignados"
-                       class="btn btn-secondary">
-
-                        Volver
-
-                    </a>
-
-                </form>
-
-            </div>
+            </section>
 
         </div>
 
     </div>
 
+    <script>
+        function mostrarVistaPrevia(
+            input,
+            contenedorId,
+            imagenId) {
+
+            const contenedor =
+                document.getElementById(contenedorId);
+
+            const imagen =
+                document.getElementById(imagenId);
+
+            if (!input.files || input.files.length === 0) {
+                contenedor.style.display = "none";
+                imagen.removeAttribute("src");
+                return;
+            }
+
+            const archivo = input.files[0];
+
+            const extensionesPermitidas = [
+                "image/jpeg",
+                "image/png"
+            ];
+
+            if (!extensionesPermitidas.includes(archivo.type)) {
+                alert(
+                    "Solo se permiten imágenes JPG, JPEG o PNG."
+                );
+
+                input.value = "";
+                contenedor.style.display = "none";
+                imagen.removeAttribute("src");
+
+                return;
+            }
+
+            const tamanoMaximo =
+                5 * 1024 * 1024;
+
+            if (archivo.size > tamanoMaximo) {
+                alert(
+                    "La imagen no puede superar los 5 MB."
+                );
+
+                input.value = "";
+                contenedor.style.display = "none";
+                imagen.removeAttribute("src");
+
+                return;
+            }
+
+            const lector = new FileReader();
+
+            lector.onload = function (evento) {
+                imagen.src = evento.target.result;
+                contenedor.style.display = "block";
+            };
+
+            lector.readAsDataURL(archivo);
+        }
+
+        const formulario =
+            document.getElementById("formFinalizar");
+
+        if (formulario) {
+            formulario.addEventListener(
+                "submit",
+                function (evento) {
+
+                    const imagenPrincipal =
+                        document.getElementById("imagen1");
+
+                    if (!imagenPrincipal.files ||
+                        imagenPrincipal.files.length === 0) {
+
+                        evento.preventDefault();
+
+                        alert(
+                            "Debes adjuntar al menos una evidencia fotográfica."
+                        );
+
+                        imagenPrincipal.focus();
+
+                        return;
+                    }
+
+                    const confirmado =
+                        confirm(
+                            "¿Estás seguro de que deseas finalizar este trabajo? Después de finalizarlo no podrás modificarlo."
+                        );
+
+                    if (!confirmado) {
+                        evento.preventDefault();
+                        return;
+                    }
+
+                    const boton =
+                        document.getElementById("btnFinalizar");
+
+                    boton.disabled = true;
+
+                    boton.innerHTML =
+                        '<i class="bi bi-hourglass-split"></i> Guardando...';
+                }
+            );
+        }
+    </script>
+
 </body>
+
 </html>

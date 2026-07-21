@@ -17,6 +17,12 @@ namespace InapaWeb.Data
 
         public DbSet<AsignacionTecnico> AsignacionesTecnicos { get; set; }
 
+        public DbSet<SolucionRecursoHumano> SolucionesRecursosHumanos
+        {
+            get;
+            set;
+        }
+
         public DbSet<Usuario> Usuarios { get; set; }
 
         public DbSet<Cliente> Clientes { get; set; }
@@ -29,7 +35,16 @@ namespace InapaWeb.Data
 
         public DbSet<Pago> Pagos { get; set; }
 
+ 
+
         public DbSet<Averia> Averias { get; set; }
+
+        public DbSet<SolucionAveria> SolucionesAverias { get; set; }
+
+        public DbSet<RecursoMaterial> RecursosMateriales { get; set; }
+
+        public DbSet<SolucionMaterial> SolucionesMateriales { get; set; }
+         
 
         public DbSet<Reclamacion> Reclamaciones { get; set; }
 
@@ -40,3 +55,4 @@ namespace InapaWeb.Data
         public DbSet<HistorialServicio> HistorialServicios { get; set; }
     }
 }
+

@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace InapaWeb.Models
@@ -12,16 +11,16 @@ namespace InapaWeb.Models
         [Required]
         public int IdCliente { get; set; }
 
-        [ForeignKey("IdCliente")]
-        public Cliente Cliente { get; set; }
+        [ForeignKey(nameof(IdCliente))]
+        public Cliente Cliente { get; set; } = null!;
 
         [Required]
         [StringLength(100)]
-        public string TipoSolicitud { get; set; }
+        public string TipoSolicitud { get; set; } = string.Empty;
 
         [Required]
         [StringLength(500)]
-        public string Descripcion { get; set; }
+        public string Descripcion { get; set; } = string.Empty;
 
         public DateTime FechaSolicitud { get; set; } = DateTime.Now;
 

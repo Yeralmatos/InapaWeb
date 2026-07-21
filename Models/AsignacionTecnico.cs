@@ -12,18 +12,18 @@ namespace InapaWeb.Models
         [Required]
         public int IdSolicitud { get; set; }
 
-        [ForeignKey("IdSolicitud")]
-        public SolicitudServicio SolicitudServicio { get; set; }
+        [ForeignKey(nameof(IdSolicitud))]
+        public SolicitudServicio SolicitudServicio { get; set; } = null!;
 
         [Required]
         public int IdTecnico { get; set; }
 
-        [ForeignKey("IdTecnico")]
-        public Usuario Tecnico { get; set; }
+        [ForeignKey(nameof(IdTecnico))]
+        public Usuario Tecnico { get; set; } = null!;
 
         [Required]
         [StringLength(100)]
-        public string TipoTrabajo { get; set; }
+        public string TipoTrabajo { get; set; } = string.Empty;
 
         public DateTime FechaAsignacion { get; set; } = DateTime.Now;
 
@@ -38,5 +38,16 @@ namespace InapaWeb.Models
 
         [StringLength(800)]
         public string? Resultado { get; set; }
+
+         
+
+        [StringLength(500)]
+        public string? EvidenciaImagen1 { get; set; }
+
+        [StringLength(500)]
+        public string? EvidenciaImagen2 { get; set; }
+
+        [StringLength(500)]
+        public string? EvidenciaImagen3 { get; set; }
     }
 }

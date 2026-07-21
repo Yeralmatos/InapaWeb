@@ -13,7 +13,7 @@ namespace InapaWeb.Models
         public int IdUsuario { get; set; }
 
         [ForeignKey("IdUsuario")]
-        public Usuario Usuario { get; set; }
+        public Usuario Usuario { get; set; } = null!;
 
         public int? IdTarifa { get; set; }
 
@@ -22,23 +22,23 @@ namespace InapaWeb.Models
 
         [Required]
         [StringLength(20)]
-        public string CedulaPasaporteRnc { get; set; }
+        public string CedulaPasaporteRnc { get; set; } = string.Empty;
 
         [Required]
         [StringLength(15)]
-        public string Telefono { get; set; }
+        public string Telefono { get; set; } = string.Empty;
 
         [Required]
         [StringLength(200)]
-        public string Direccion { get; set; }
+        public string Direccion { get; set; } = string.Empty;
 
         [Required]
         [StringLength(100)]
-        public string Provincia { get; set; }
+        public string Provincia { get; set; } = string.Empty;
 
         [Required]
         [StringLength(100)]
-        public string Municipio { get; set; }
+        public string Municipio { get; set; } = string.Empty;
 
         [StringLength(100)]
         public string? Sector { get; set; }

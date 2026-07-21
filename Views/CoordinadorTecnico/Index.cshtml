@@ -1,0 +1,1648 @@
+﻿@using InapaWeb.Models
+
+@{
+    ViewData["Title"] = "Coordinación Técnica";
+    Layout = null;
+
+    string nombreUsuario =
+        ViewBag.NombreUsuario ?? "Coordinador Técnico";
+
+    bool debeCambiarClave =
+        ViewBag.DebeCambiarClave ?? false;
+
+    int totalPendientes =
+        ViewBag.TotalPendientesAsignacion ?? 0;
+
+    int totalAsignadas =
+        ViewBag.TotalAsignadas ?? 0;
+
+    int totalFinalizadas =
+        ViewBag.TotalLevantamientosFinalizados ?? 0;
+
+    int totalTecnicos =
+        ViewBag.TotalTecnicosActivos ?? 0;
+
+    int totalAverias =
+        ViewBag.TotalAveriasNuevas ?? 0;
+
+    int totalReclamaciones =
+        ViewBag.TotalReclamacionesNuevas ?? 0;
+
+    int totalSolicitudesNotificacion =
+        ViewBag.TotalSolicitudesNotificacion ?? 0;
+
+    int totalFinalizadosNotificacion =
+        ViewBag.TotalFinalizadosNotificacion ?? 0;
+
+    int totalNotificaciones =
+        ViewBag.TotalNotificaciones ?? 0;
+
+    var solicitudesPendientes =
+        ViewBag.SolicitudesPendientes as List<SolicitudServicio>
+        ?? new List<SolicitudServicio>();
+
+    var trabajosActivos =
+        ViewBag.TrabajosActivos as List<AsignacionTecnico>
+        ?? new List<AsignacionTecnico>();
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1" />
+
+    <title>Coordinación Técnica - INAPA</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet" />
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+          rel="stylesheet" />
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #f3f6fb;
+            font-family: "Segoe UI", Arial, sans-serif;
+            color: #16233a;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* =========================================================
+                   BARRA LATERAL
+                ========================================================= */
+
+        .sidebar {
+            width: 260px;
+            min-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: linear-gradient( 180deg, #082b57 0%, #061d3b 100% );
+            color: white;
+            padding: 25px 18px;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .logo-box {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+            .logo-box img {
+                width: 92px;
+                height: 92px;
+                object-fit: contain;
+                background: white;
+                border-radius: 50%;
+                padding: 8px;
+                margin-bottom: 12px;
+            }
+
+            .logo-box h4 {
+                margin: 0;
+                font-size: 20px;
+                font-weight: 700;
+            }
+
+            .logo-box p {
+                margin: 4px 0 0;
+                font-size: 13px;
+                color: #bed3ec;
+            }
+
+        .menu-title {
+            color: #84a8d3;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin: 20px 12px 8px;
+            letter-spacing: 0.8px;
+        }
+
+        .menu-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #e8f1fb;
+            text-decoration: none;
+            padding: 12px 14px;
+            margin-bottom: 7px;
+            border-radius: 10px;
+            transition: 0.2s;
+        }
+
+            .menu-link:hover,
+            .menu-link.active {
+                background: rgba(255, 255, 255, 0.14);
+                color: white;
+            }
+
+            .menu-link i {
+                width: 22px;
+                font-size: 18px;
+            }
+
+        /* =========================================================
+                   CONTENIDO PRINCIPAL
+                ========================================================= */
+
+        .main {
+            margin-left: 260px;
+            width: calc(100% - 260px);
+            padding: 28px;
+        }
+
+        /* =========================================================
+                   BARRA SUPERIOR
+                ========================================================= */
+
+        .topbar {
+            background: white;
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 5px 18px rgba(20, 47, 83, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+            .topbar h2 {
+                margin: 0;
+                font-size: 27px;
+                font-weight: 750;
+                color: #0a2c57;
+            }
+
+            .topbar p {
+                margin: 5px 0 0;
+                color: #6d7b8d;
+            }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+        }
+
+        .top-icon-button {
+            position: relative;
+            width: 44px;
+            height: 44px;
+            border: none;
+            border-radius: 12px;
+            background: #eef4fb;
+            color: #0b5eb8;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 19px;
+            transition: 0.2s;
+        }
+
+            .top-icon-button:hover,
+            .top-icon-button:focus {
+                background: #dceaf9;
+                color: #084c94;
+            }
+
+        .notification-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 5px;
+            border-radius: 20px;
+            background: #dc3545;
+            color: white;
+            border: 2px solid white;
+            font-size: 10px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notification-menu {
+            width: 390px;
+            max-height: 520px;
+            overflow-y: auto;
+            border: none;
+            border-radius: 16px;
+            padding: 0;
+            box-shadow: 0 18px 45px rgba(15, 35, 60, 0.2);
+        }
+
+        .notification-header {
+            padding: 17px 19px;
+            border-bottom: 1px solid #e7edf5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+            .notification-header strong {
+                color: #0a2c57;
+                font-size: 16px;
+            }
+
+            .notification-header span {
+                font-size: 12px;
+                color: #7a8798;
+            }
+
+        .notification-item {
+            display: flex;
+            gap: 12px;
+            padding: 15px 18px;
+            color: #26364b;
+            text-decoration: none;
+            border-bottom: 1px solid #eef2f6;
+            transition: 0.2s;
+        }
+
+            .notification-item:hover {
+                background: #f7faff;
+                color: #26364b;
+            }
+
+            .notification-item:last-child {
+                border-bottom: none;
+            }
+
+        .notification-icon {
+            flex: 0 0 42px;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .notification-text {
+            flex: 1;
+        }
+
+            .notification-text strong {
+                display: block;
+                font-size: 14px;
+                color: #183c68;
+                margin-bottom: 3px;
+            }
+
+            .notification-text p {
+                margin: 0;
+                color: #6d798a;
+                font-size: 12px;
+                line-height: 1.45;
+            }
+
+        .notification-arrow {
+            display: flex;
+            align-items: center;
+            color: #96a3b3;
+        }
+
+        .notification-empty {
+            padding: 35px 20px;
+            text-align: center;
+            color: #798698;
+        }
+
+            .notification-empty i {
+                display: block;
+                font-size: 38px;
+                color: #b3bfcc;
+                margin-bottom: 10px;
+            }
+
+        .settings-menu {
+            min-width: 230px;
+            border: none;
+            border-radius: 14px;
+            padding: 8px;
+            box-shadow: 0 16px 38px rgba(15, 35, 60, 0.18);
+        }
+
+            .settings-menu .dropdown-item {
+                border-radius: 9px;
+                padding: 10px 12px;
+                color: #314156;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+                .settings-menu .dropdown-item:hover {
+                    background: #edf5ff;
+                    color: #0b5eb8;
+                }
+
+                .settings-menu .dropdown-item.logout-item {
+                    color: #b4232c;
+                }
+
+                    .settings-menu .dropdown-item.logout-item:hover {
+                        background: #fff0f1;
+                        color: #a51f28;
+                    }
+
+        .user-box {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            margin-left: 4px;
+            white-space: nowrap;
+        }
+
+        .user-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: #e8f1fc;
+            color: #0b5eb8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 23px;
+        }
+
+        /* =========================================================
+                   AVISOS
+                ========================================================= */
+
+        .password-alert {
+            background: linear-gradient( 90deg, #fff8dc, #fffdf3 );
+            border: 1px solid #f2d978;
+            border-radius: 14px;
+            padding: 16px 18px;
+            margin-bottom: 22px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .password-alert-icon {
+            width: 46px;
+            height: 46px;
+            min-width: 46px;
+            border-radius: 13px;
+            background: #ffe69c;
+            color: #966400;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 21px;
+        }
+
+        .password-alert-content {
+            flex: 1;
+        }
+
+            .password-alert-content strong {
+                color: #725100;
+            }
+
+            .password-alert-content p {
+                margin: 3px 0 0;
+                color: #7a672e;
+                font-size: 13px;
+            }
+
+        /* =========================================================
+                   TARJETAS
+                ========================================================= */
+
+        .summary-card {
+            border: 0;
+            border-radius: 16px;
+            box-shadow: 0 5px 18px rgba(20, 47, 83, 0.08);
+            height: 100%;
+            transition: 0.2s;
+        }
+
+            .summary-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 10px 25px rgba(20, 47, 83, 0.12);
+            }
+
+            .summary-card .card-body {
+                display: flex;
+                align-items: center;
+                gap: 16px;
+                padding: 22px;
+            }
+
+        .summary-card-link {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .summary-icon {
+            width: 58px;
+            height: 58px;
+            min-width: 58px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 27px;
+        }
+
+        .icon-blue {
+            background: #e7f1ff;
+            color: #0d6efd;
+        }
+
+        .icon-orange {
+            background: #fff0dd;
+            color: #dc7600;
+        }
+
+        .icon-green {
+            background: #e1f8eb;
+            color: #198754;
+        }
+
+        .icon-purple {
+            background: #f0e8ff;
+            color: #6f42c1;
+        }
+
+        .icon-red {
+            background: #ffe7e9;
+            color: #dc3545;
+        }
+
+        .icon-cyan {
+            background: #e3f8ff;
+            color: #087990;
+        }
+
+        .summary-data h3 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 750;
+        }
+
+        .summary-data p {
+            margin: 3px 0 0;
+            color: #6d7b8d;
+            font-size: 14px;
+        }
+
+        /* =========================================================
+                   PANELES Y TABLAS
+                ========================================================= */
+
+        .panel {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 5px 18px rgba(20, 47, 83, 0.08);
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .panel-header {
+            padding: 19px 22px;
+            border-bottom: 1px solid #e8edf4;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+            .panel-header h5 {
+                margin: 0;
+                color: #0a2c57;
+                font-weight: 700;
+            }
+
+        .panel-body {
+            padding: 0;
+        }
+
+        .table {
+            margin-bottom: 0;
+            vertical-align: middle;
+        }
+
+            .table thead th {
+                background: #f7f9fc;
+                color: #536174;
+                border-bottom: 1px solid #e4e9f0;
+                font-size: 13px;
+                font-weight: 700;
+                padding: 14px 16px;
+            }
+
+            .table tbody td {
+                padding: 15px 16px;
+                border-color: #edf1f5;
+                color: #344257;
+            }
+
+            .table tbody tr:hover {
+                background: #fafcff;
+            }
+
+        .client-name {
+            font-weight: 650;
+            color: #173f6d;
+        }
+
+        .empty-box {
+            text-align: center;
+            padding: 45px 20px;
+            color: #768397;
+        }
+
+            .empty-box i {
+                display: block;
+                font-size: 42px;
+                margin-bottom: 12px;
+                color: #aeb9c7;
+            }
+
+        .badge-state {
+            border-radius: 20px;
+            padding: 7px 11px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .footer-note {
+            margin-top: 25px;
+            color: #8591a2;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        /* =========================================================
+                   RESPONSIVE
+                ========================================================= */
+
+        @@media (max-width: 1100px) {
+            .topbar {
+                align-items: flex-start;
+            }
+
+            .topbar-actions {
+                flex-wrap: wrap;
+                justify-content: flex-end;
+            }
+        }
+
+        @@media (max-width: 992px) {
+            .sidebar {
+                width: 220px;
+            }
+
+            .main {
+                margin-left: 220px;
+                width: calc(100% - 220px);
+                padding: 20px;
+            }
+
+            .notification-menu {
+                width: 350px;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .sidebar {
+                position: static;
+                width: 100%;
+                min-height: auto;
+            }
+
+            .layout {
+                display: block;
+            }
+
+            .main {
+                margin-left: 0;
+                width: 100%;
+                padding: 15px;
+            }
+
+            .topbar {
+                flex-direction: column;
+            }
+
+            .topbar-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .user-box {
+                white-space: normal;
+            }
+
+            .password-alert {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+                .password-alert .btn {
+                    width: 100%;
+                }
+        }
+
+        @@media (max-width: 480px) {
+            .notification-menu {
+                width: 310px;
+            }
+
+            .user-box > div:last-child {
+                display: none;
+            }
+
+            .topbar h2 {
+                font-size: 23px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="layout">
+
+        <!-- =====================================================
+             BARRA LATERAL
+        ====================================================== -->
+
+        <aside class="sidebar">
+
+            <div class="logo-box">
+
+                <img src="~/images/inapa-logo.png"
+                     alt="Logo de INAPA" />
+
+                <h4>INAPA</h4>
+
+                <p>Coordinación Técnica</p>
+
+            </div>
+
+            <div class="menu-title">
+                Principal
+            </div>
+
+            <a asp-controller="CoordinadorTecnico"
+               asp-action="Index"
+               class="menu-link active">
+
+                <i class="bi bi-grid-1x2-fill"></i>
+
+                Panel principal
+            </a>
+
+            <div class="menu-title">
+                Gestión técnica
+            </div>
+
+            <a asp-controller="CoordinadorTecnico"
+               asp-action="SolicitudesPendientes"
+               class="menu-link">
+
+                <i class="bi bi-clipboard-check"></i>
+
+                Solicitudes por asignar
+
+                @if (totalPendientes > 0)
+                {
+                    <span class="badge bg-danger ms-auto">
+                        @totalPendientes
+                    </span>
+                }
+
+            </a>
+
+            <a asp-controller="CoordinadorTecnico"
+               asp-action="TrabajosAsignados"
+               class="menu-link">
+
+                <i class="bi bi-tools"></i>
+
+                Trabajos asignados
+
+                @if (totalAsignadas > 0)
+                {
+                    <span class="badge bg-warning text-dark ms-auto">
+                        @totalAsignadas
+                    </span>
+                }
+
+            </a>
+
+            <a asp-controller="CoordinadorTecnico"
+               asp-action="TrabajosAsignados"
+               asp-route-estado="Finalizado"
+               class="menu-link">
+
+                <i class="bi bi-check2-circle"></i>
+
+                Levantamientos finalizados
+
+                @if (totalFinalizadas > 0)
+                {
+                    <span class="badge bg-success ms-auto">
+                        @totalFinalizadas
+                    </span>
+                }
+
+            </a>
+
+            <div class="menu-title">
+                Cuenta
+            </div>
+
+            <a asp-controller="Acceso"
+               asp-action="CerrarSesion"
+               class="menu-link">
+
+                <i class="bi bi-box-arrow-left"></i>
+
+                Cerrar sesión
+            </a>
+
+        </aside>
+
+        <!-- =====================================================
+             CONTENIDO PRINCIPAL
+        ====================================================== -->
+
+        <main class="main">
+
+            <!-- =================================================
+                 BARRA SUPERIOR
+            ================================================== -->
+
+            <section class="topbar">
+
+                <div>
+
+                    <h2>
+                        Panel de Coordinación Técnica
+                    </h2>
+
+                    <p>
+                        Administra las asignaciones y supervisa los trabajos técnicos.
+                    </p>
+
+                </div>
+
+                <div class="topbar-actions">
+
+                    <!-- CAMPANA DE NOTIFICACIONES -->
+
+                    <div class="dropdown">
+
+                        <button class="top-icon-button"
+                                type="button"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                                title="Notificaciones">
+
+                            <i class="bi bi-bell-fill"></i>
+
+                            @if (totalNotificaciones > 0)
+                            {
+                                <span class="notification-count">
+                                    @(totalNotificaciones > 99
+                                                                    ? "99+"
+                                                                    : totalNotificaciones.ToString())
+                            </span>
+                                                        }
+
+                        </button>
+
+                        <div class="dropdown-menu dropdown-menu-end notification-menu">
+
+                            <div class="notification-header">
+
+                                <strong>
+                                    Notificaciones
+                                </strong>
+
+                                <span>
+                                    @totalNotificaciones pendiente(s)
+                                </span>
+
+                            </div>
+
+                            @if (debeCambiarClave)
+                            {
+                                <a asp-controller="Acceso"
+                                   asp-action="CambiarClave"
+                                   class="notification-item">
+
+                                    <div class="notification-icon icon-orange">
+
+                                        <i class="bi bi-shield-lock-fill"></i>
+
+                                    </div>
+
+                                    <div class="notification-text">
+
+                                        <strong>
+                                            Actualiza tu contraseña
+                                        </strong>
+
+                                        <p>
+                                            Estás utilizando la contraseña temporal
+                                            establecida en la oficina.
+                                        </p>
+
+                                    </div>
+
+                                    <div class="notification-arrow">
+
+                                        <i class="bi bi-chevron-right"></i>
+
+                                    </div>
+
+                                </a>
+                            }
+
+                            @if (totalAverias > 0)
+                            {
+                                <a asp-controller="Admin"
+                                   asp-action="Averias"
+                                   class="notification-item">
+
+                                    <div class="notification-icon icon-red">
+
+                                        <i class="bi bi-exclamation-octagon-fill"></i>
+
+                                    </div>
+
+                                    <div class="notification-text">
+
+                                        <strong>
+                                            @totalAverias avería(s) reportada(s)
+                                        </strong>
+
+                                        <p>
+                                            Existen averías nuevas pendientes de revisión.
+                                        </p>
+
+                                    </div>
+
+                                    <div class="notification-arrow">
+
+                                        <i class="bi bi-chevron-right"></i>
+
+                                    </div>
+
+                                </a>
+                            }
+
+                            @if (totalReclamaciones > 0)
+                            {
+                                <a asp-controller="Admin"
+                                   asp-action="Reclamaciones"
+                                   class="notification-item">
+
+                                    <div class="notification-icon icon-purple">
+
+                                        <i class="bi bi-chat-left-text-fill"></i>
+
+                                    </div>
+
+                                    <div class="notification-text">
+
+                                        <strong>
+                                            @totalReclamaciones reclamación(es) nueva(s)
+                                        </strong>
+
+                                        <p>
+                                            Existen reclamaciones esperando atención.
+                                        </p>
+
+                                    </div>
+
+                                    <div class="notification-arrow">
+
+                                        <i class="bi bi-chevron-right"></i>
+
+                                    </div>
+
+                                </a>
+                            }
+
+                            @if (totalSolicitudesNotificacion > 0)
+                            {
+                                <a asp-controller="CoordinadorTecnico"
+                                   asp-action="SolicitudesPendientes"
+                                   class="notification-item">
+
+                                    <div class="notification-icon icon-blue">
+
+                                        <i class="bi bi-clipboard2-check-fill"></i>
+
+                                    </div>
+
+                                    <div class="notification-text">
+
+                                        <strong>
+                                            @totalSolicitudesNotificacion solicitud(es) por asignar
+                                        </strong>
+
+                                        <p>
+                                            Existen solicitudes aprobadas sin técnico asignado.
+                                        </p>
+
+                                    </div>
+
+                                    <div class="notification-arrow">
+
+                                        <i class="bi bi-chevron-right"></i>
+
+                                    </div>
+
+                                </a>
+                            }
+
+                            @if (totalFinalizadosNotificacion > 0)
+                            {
+                                <a asp-controller="CoordinadorTecnico"
+                                   asp-action="TrabajosAsignados"
+                                   asp-route-estado="Finalizado"
+                                   class="notification-item">
+
+                                    <div class="notification-icon icon-green">
+
+                                        <i class="bi bi-check-circle-fill"></i>
+
+                                    </div>
+
+                                    <div class="notification-text">
+
+                                        <strong>
+                                            @totalFinalizadosNotificacion levantamiento(s) finalizado(s)
+                                        </strong>
+
+                                        <p>
+                                            Hay trabajos finalizados disponibles para revisión.
+                                        </p>
+
+                                    </div>
+
+                                    <div class="notification-arrow">
+
+                                        <i class="bi bi-chevron-right"></i>
+
+                                    </div>
+
+                                </a>
+                            }
+
+                            @if (totalNotificaciones == 0)
+                            {
+                                <div class="notification-empty">
+
+                                    <i class="bi bi-bell-slash"></i>
+
+                                    <strong>
+                                        No tienes notificaciones
+                                    </strong>
+
+                                    <div>
+                                        Todo está al día.
+                                    </div>
+
+                                </div>
+                            }
+
+                        </div>
+
+                    </div>
+
+                    <!-- PIÑÓN DE AJUSTES -->
+
+                    <div class="dropdown">
+
+                        <button class="top-icon-button"
+                                type="button"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                                title="Configuración">
+
+                            <i class="bi bi-gear-fill"></i>
+
+                        </button>
+
+                        <ul class="dropdown-menu dropdown-menu-end settings-menu">
+
+                            <li>
+
+                                <h6 class="dropdown-header">
+                                    Configuración de cuenta
+                                </h6>
+
+                            </li>
+
+                            <li>
+
+                                <a asp-controller="Acceso"
+                                   asp-action="CambiarClave"
+                                   class="dropdown-item">
+
+                                    <i class="bi bi-key-fill"></i>
+
+                                    Cambiar contraseña
+                                </a>
+
+                            </li>
+
+                            <li>
+                                <hr class="dropdown-divider" />
+                            </li>
+
+                            <li>
+
+                                <a asp-controller="Acceso"
+                                   asp-action="CerrarSesion"
+                                   class="dropdown-item logout-item">
+
+                                    <i class="bi bi-box-arrow-left"></i>
+
+                                    Cerrar sesión
+                                </a>
+
+                            </li>
+
+                        </ul>
+
+                    </div>
+
+                    <!-- USUARIO -->
+
+                    <div class="user-box">
+
+                        <div class="user-icon">
+
+                            <i class="bi bi-person-gear"></i>
+
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                @nombreUsuario
+                            </strong>
+
+                            <div class="text-secondary small">
+                                Coordinador Técnico
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- =================================================
+                 MENSAJES
+            ================================================== -->
+            @if (TempData["MensajeCoordinador"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show">
+
+                    <i class="bi bi-check-circle me-2"></i>
+
+                    @TempData["MensajeCoordinador"]
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert">
+                    </button>
+
+                </div>
+            }
+
+            @if (TempData["ErrorCoordinador"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show">
+
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+
+                    @TempData["ErrorCoordinador"]
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert">
+                    </button>
+
+                </div>
+            }
+
+            @if (debeCambiarClave)
+            {
+                <div class="password-alert">
+
+                    <div class="password-alert-icon">
+
+                        <i class="bi bi-shield-lock-fill"></i>
+
+                    </div>
+
+                    <div class="password-alert-content">
+
+                        <strong>
+                            Actualiza la contraseña establecida en la oficina
+                        </strong>
+
+                        <p>
+                            Por seguridad, reemplaza la contraseña temporal
+                            por una contraseña personal.
+                        </p>
+
+                    </div>
+
+                    <a asp-controller="Acceso"
+                       asp-action="CambiarClave"
+                       class="btn btn-warning">
+
+                        <i class="bi bi-key me-1"></i>
+
+                        Actualizar contraseña
+                    </a>
+
+                </div>
+            }
+
+            <!-- =================================================
+                 TARJETAS DE RESUMEN
+            ================================================== -->
+
+            <section class="row g-4 mb-4">
+
+                <div class="col-xl-3 col-md-6">
+
+                    <a asp-controller="CoordinadorTecnico"
+                       asp-action="SolicitudesPendientes"
+                       class="summary-card-link">
+
+                        <div class="card summary-card">
+
+                            <div class="card-body">
+
+                                <div class="summary-icon icon-blue">
+
+                                    <i class="bi bi-clipboard2-data"></i>
+
+                                </div>
+
+                                <div class="summary-data">
+
+                                    <h3>
+                                        @totalPendientes
+                                    </h3>
+
+                                    <p>
+                                        Pendientes de asignación
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </a>
+
+                </div>
+
+                <div class="col-xl-3 col-md-6">
+
+                    <a asp-controller="CoordinadorTecnico"
+                       asp-action="TrabajosAsignados"
+                       asp-route-estado="Asignado"
+                       class="summary-card-link">
+
+                        <div class="card summary-card">
+
+                            <div class="card-body">
+
+                                <div class="summary-icon icon-orange">
+
+                                    <i class="bi bi-person-workspace"></i>
+
+                                </div>
+
+                                <div class="summary-data">
+
+                                    <h3>
+                                        @totalAsignadas
+                                    </h3>
+
+                                    <p>
+                                        Trabajos activos
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </a>
+
+                </div>
+
+                <div class="col-xl-3 col-md-6">
+
+                    <a asp-controller="CoordinadorTecnico"
+                       asp-action="TrabajosAsignados"
+                       asp-route-estado="Finalizado"
+                       class="summary-card-link">
+
+                        <div class="card summary-card">
+
+                            <div class="card-body">
+
+                                <div class="summary-icon icon-green">
+
+                                    <i class="bi bi-check2-circle"></i>
+
+                                </div>
+
+                                <div class="summary-data">
+
+                                    <h3>
+                                        @totalFinalizadas
+                                    </h3>
+
+                                    <p>
+                                        Levantamientos finalizados
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </a>
+
+                </div>
+
+                <div class="col-xl-3 col-md-6">
+
+                    <div class="card summary-card">
+
+                        <div class="card-body">
+
+                            <div class="summary-icon icon-purple">
+
+                                <i class="bi bi-people-fill"></i>
+
+                            </div>
+
+                            <div class="summary-data">
+
+                                <h3>
+                                    @totalTecnicos
+                                </h3>
+
+                                <p>
+                                    Técnicos activos
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- =================================================
+                 TABLAS
+            ================================================== -->
+
+            <section class="row g-4">
+
+                <!-- SOLICITUDES PENDIENTES -->
+
+                <div class="col-xl-6">
+
+                    <div class="panel">
+
+                        <div class="panel-header">
+
+                            <h5>
+
+                                <i class="bi bi-clipboard2-check me-2"></i>
+
+                                Solicitudes pendientes
+                            </h5>
+
+                            <a asp-controller="CoordinadorTecnico"
+                               asp-action="SolicitudesPendientes"
+                               class="btn btn-sm btn-outline-primary">
+
+                                Ver todas
+                            </a>
+
+                        </div>
+
+                        <div class="panel-body">
+
+                            @if (solicitudesPendientes.Count == 0)
+                            {
+                                <div class="empty-box">
+
+                                    <i class="bi bi-inbox"></i>
+
+                                    No hay solicitudes aprobadas pendientes de asignación.
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="table-responsive">
+
+                                    <table class="table">
+
+                                        <thead>
+
+                                            <tr>
+                                                <th>Cliente</th>
+                                                <th>Solicitud</th>
+                                                <th>Fecha</th>
+                                                <th></th>
+                                            </tr>
+
+                                        </thead>
+
+                                        <tbody>
+
+                                            @foreach (var solicitud in solicitudesPendientes)
+                                            {
+                                                <tr>
+
+                                                    <td>
+
+                                                        <span class="client-name">
+
+                                                            @(solicitud.Cliente?
+                                                                                                                .Usuario?
+                                                                                                                .NombreUsuario
+                                                                                                                ?? "Cliente no disponible")
+
+                                                </span>
+
+                                                    </td>
+
+                                                    <td>
+                                                        @solicitud.TipoSolicitud
+                                                    </td>
+
+                                                    <td>
+                                                        @solicitud.FechaSolicitud.ToString("dd/MM/yyyy")
+                                                    </td>
+
+                                                    <td class="text-end">
+
+                                                        <a asp-controller="CoordinadorTecnico"
+                                                           asp-action="DetalleSolicitud"
+                                                           asp-route-id="@solicitud.IdSolicitud"
+                                                           class="btn btn-sm btn-outline-secondary"
+                                                           title="Ver solicitud">
+
+                                                            <i class="bi bi-eye"></i>
+
+                                                        </a>
+
+                                                        <a asp-controller="CoordinadorTecnico"
+                                                           asp-action="AsignarTecnico"
+                                                           asp-route-id="@solicitud.IdSolicitud"
+                                                           class="btn btn-sm btn-primary"
+                                                           title="Asignar técnico">
+
+                                                            <i class="bi bi-person-plus"></i>
+
+                                                        </a>
+
+                                                    </td>
+
+                                                </tr>
+                                                                                }
+
+                                        </tbody>
+
+                                    </table>
+
+                                </div>
+                            }
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- TRABAJOS ACTIVOS -->
+
+                <div class="col-xl-6">
+
+                    <div class="panel">
+
+                        <div class="panel-header">
+
+                            <h5>
+
+                                <i class="bi bi-wrench-adjustable-circle me-2"></i>
+
+                                Trabajos asignados
+                            </h5>
+
+                            <a asp-controller="CoordinadorTecnico"
+                               asp-action="TrabajosAsignados"
+                               class="btn btn-sm btn-outline-primary">
+
+                                Ver todos
+                            </a>
+
+                        </div>
+
+                        <div class="panel-body">
+
+                            @if (trabajosActivos.Count == 0)
+                            {
+                                <div class="empty-box">
+
+                                    <i class="bi bi-tools"></i>
+
+                                    No hay trabajos técnicos activos.
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="table-responsive">
+
+                                    <table class="table">
+
+                                        <thead>
+
+                                            <tr>
+                                                <th>Técnico</th>
+                                                <th>Cliente</th>
+                                                <th>Estado</th>
+                                                <th></th>
+                                            </tr>
+
+                                        </thead>
+
+                                        <tbody>
+
+                                            @foreach (var trabajo in trabajosActivos)
+                                            {
+                                                <tr>
+
+                                                    <td>
+
+                                                        <span class="client-name">
+
+                                                            @(trabajo.Tecnico?
+                                                                                                                .NombreUsuario
+                                                                                                                ?? "Técnico no disponible")
+
+                                                        </span>
+
+                                                    </td>
+
+                                                    <td>
+
+                                                        @(trabajo.SolicitudServicio?
+                                                                                                        .Cliente?
+                                                                                                        .Usuario?
+                                                                                                        .NombreUsuario
+                                                                                                        ?? "Cliente no disponible")
+
+                                            </td>
+
+                                                    <td>
+
+                                                @if (trabajo.Estado == "Asignado")
+                                                        {
+                                                            <span class="badge bg-warning text-dark badge-state">
+
+                                                                Asignado
+
+                                                            </span>
+                                                        }
+                                                        else if (
+                                                        trabajo.Estado == "En proceso" ||
+                                                        trabajo.Estado == "En Proceso")
+                                                        {
+                                                            <span class="badge bg-info text-dark badge-state">
+
+                                                                En proceso
+
+                                                            </span>
+                                                        }
+                                                        else if (trabajo.Estado == "Finalizado")
+                                                        {
+                                                            <span class="badge bg-success badge-state">
+
+                                                                Finalizado
+
+                                                            </span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="badge bg-secondary badge-state">
+
+                                                                @trabajo.Estado
+
+                                                            </span>
+                                                        }
+
+                                                    </td>
+
+                                                    <td class="text-end">
+
+                                                        <a asp-controller="CoordinadorTecnico"
+                                                           asp-action="DetalleAsignacion"
+                                                           asp-route-id="@trabajo.IdAsignacion"
+                                                           class="btn btn-sm btn-outline-secondary"
+                                                           title="Ver detalle">
+
+                                                            <i class="bi bi-eye"></i>
+
+                                                        </a>
+
+                                                        @if (trabajo.Estado != "Finalizado")
+                                                        {
+                                                            <a asp-controller="CoordinadorTecnico"
+                                                               asp-action="ReasignarTecnico"
+                                                               asp-route-id="@trabajo.IdAsignacion"
+                                                               class="btn btn-sm btn-outline-primary"
+                                                               title="Reasignar técnico">
+
+                                                                <i class="bi bi-arrow-repeat"></i>
+
+                                                            </a>
+                                                        }
+
+                                                    </td>
+
+                                                </tr>
+                                            }
+
+                                        </tbody>
+
+                                    </table>
+
+                                </div>
+                            }
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            <div class="footer-note">
+
+                Sistema de Gestión de Servicios de INAPA
+
+            </div>
+
+        </main>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+    </script>
+
+</body>
+</html>

@@ -3,26 +3,26 @@
 @{
     Layout = null;
 
-    var estadoSeleccionado =
+    string estadoSeleccionado =
         ViewBag.EstadoSeleccionado as string ?? "Todos";
 
     string tituloPagina =
         estadoSeleccionado == "Asignado"
-            ? "Trabajos Pendientes"
+            ? "Trabajos pendientes"
             : estadoSeleccionado == "En Proceso"
-                ? "Trabajos en Proceso"
+                ? "Trabajos en proceso"
                 : estadoSeleccionado == "Finalizado"
-                    ? "Trabajos Finalizados"
-                    : "Trabajos Asignados";
+                    ? "Trabajos finalizados"
+                    : "Trabajos asignados";
 
     string descripcionPagina =
         estadoSeleccionado == "Asignado"
-            ? "Trabajos asignados que aún no han sido iniciados."
+            ? "Trabajos asignados que todavía no han sido iniciados."
             : estadoSeleccionado == "En Proceso"
                 ? "Levantamientos técnicos que se encuentran en ejecución."
                 : estadoSeleccionado == "Finalizado"
                     ? "Trabajos técnicos que ya fueron completados."
-                    : "Todos los trabajos enviados por el administrador.";
+                    : "Todos los trabajos asignados por Coordinación Técnica.";
 
     string mensajeVacio =
         estadoSeleccionado == "Asignado"
@@ -41,6 +41,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+
     <meta charset="utf-8" />
 
     <meta name="viewport"
@@ -62,7 +63,7 @@
         body {
             margin: 0;
             background: #f4f7fb;
-            font-family: 'Segoe UI', Arial, sans-serif;
+            font-family: "Segoe UI", Arial, sans-serif;
             color: #10213f;
         }
 
@@ -80,7 +81,7 @@
             margin-bottom: 25px;
             border-radius: 18px;
             color: white;
-            background: linear-gradient(135deg, #0d6efd, #0b4bb3);
+            background: linear-gradient(135deg, #1785ed, #10298d);
             box-shadow: 0 10px 25px rgba(0, 0, 0, .12);
         }
 
@@ -94,6 +95,64 @@
                 opacity: .9;
             }
 
+        .btn-volver {
+            border: none;
+            border-radius: 11px;
+            padding: 11px 17px;
+            background: white;
+            color: #173c8d;
+            font-weight: 700;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+            .btn-volver:hover {
+                background: #edf4ff;
+                color: #0e2c72;
+            }
+
+        .mensajes {
+            margin-bottom: 20px;
+        }
+
+            .mensajes .alert {
+                border: none;
+                border-radius: 13px;
+                font-weight: 600;
+            }
+
+        .filtros {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .filtro-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 15px;
+            border: 1px solid #d5deeb;
+            border-radius: 10px;
+            background: white;
+            color: #314461;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+            .filtro-btn:hover {
+                border-color: #176fd0;
+                color: #1763b4;
+                background: #f5f9ff;
+            }
+
+            .filtro-btn.activo {
+                border-color: #176fd0;
+                background: #176fd0;
+                color: white;
+            }
+
         .resumen-grid {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -101,16 +160,33 @@
             margin-bottom: 24px;
         }
 
+        .resumen-enlace {
+            color: inherit;
+            text-decoration: none;
+        }
+
         .resumen {
             display: flex;
             align-items: center;
             gap: 15px;
+            min-height: 105px;
             padding: 20px;
             border-radius: 16px;
             background: white;
             border: 1px solid #e3e9f2;
             box-shadow: 0 8px 20px rgba(0, 0, 0, .06);
+            transition: transform .2s, box-shadow .2s;
         }
+
+            .resumen:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 12px 28px rgba(0, 0, 0, .1);
+            }
+
+            .resumen.seleccionado {
+                border-color: #1671d5;
+                box-shadow: 0 0 0 3px rgba(22, 113, 213, .1);
+            }
 
         .resumen-icon {
             width: 54px;
@@ -148,12 +224,29 @@
             font-size: 27px;
         }
 
-        .card {
+        .tabla-card {
             border: none;
             border-radius: 18px;
             overflow: hidden;
+            background: white;
             box-shadow: 0 8px 20px rgba(0, 0, 0, .08);
         }
+
+        .tabla-encabezado {
+            padding: 19px 22px;
+            border-bottom: 1px solid #e8edf5;
+        }
+
+            .tabla-encabezado h3 {
+                margin: 0;
+                font-size: 19px;
+                font-weight: 800;
+            }
+
+            .tabla-encabezado span {
+                color: #748198;
+                font-size: 14px;
+            }
 
         .table-wrap {
             overflow-x: auto;
@@ -182,10 +275,18 @@
         .request-code {
             color: #06469b;
             font-weight: 800;
+            white-space: nowrap;
         }
 
         .client-name {
             font-weight: 700;
+            color: #182844;
+        }
+
+        .client-email {
+            margin-top: 3px;
+            color: #7a879b;
+            font-size: 12px;
         }
 
         .status-badge {
@@ -196,6 +297,7 @@
             border-radius: 999px;
             font-size: 13px;
             font-weight: 700;
+            white-space: nowrap;
         }
 
         .status-assigned {
@@ -212,6 +314,32 @@
             background: #d1e7dd;
             color: #0f5132;
         }
+
+        .status-other {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .btn-abrir {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            border: none;
+            border-radius: 9px;
+            padding: 9px 13px;
+            background: #19a7ce;
+            color: white;
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+            .btn-abrir:hover {
+                background: #118aac;
+                color: white;
+            }
 
         .empty-state {
             padding: 60px 20px;
@@ -241,22 +369,24 @@
                 flex-direction: column;
             }
 
-                .titulo .btn {
-                    width: 100%;
-                }
+            .btn-volver {
+                width: 100%;
+                text-align: center;
+            }
 
             .resumen-grid {
                 grid-template-columns: 1fr;
             }
         }
     </style>
+
 </head>
 
 <body>
 
     <div class="page-shell">
 
-        <div class="titulo">
+        <header class="titulo">
 
             <div>
                 <h2>
@@ -264,59 +394,158 @@
                     @tituloPagina
                 </h2>
 
-                <p>
-                    @descripcionPagina
-                </p>
+                <p>@descripcionPagina</p>
             </div>
 
             <a asp-controller="Tecnico"
                asp-action="Index"
-               class="btn btn-light">
+               class="btn-volver">
 
                 <i class="bi bi-arrow-left"></i>
                 Volver al panel
+
             </a>
+
+        </header>
+
+        <div class="mensajes">
+
+            @if (TempData["Exito"] != null)
+            {
+                <div class="alert alert-success">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    @TempData["Exito"]
+                </div>
+            }
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    @TempData["Error"]
+                </div>
+            }
 
         </div>
 
+        <nav class="filtros">
+
+            <a asp-controller="Tecnico"
+               asp-action="TrabajosAsignados"
+               class="filtro-btn @(estadoSeleccionado == "Todos" ? "activo" : "")">
+
+                <i class="bi bi-list-ul"></i>
+                Todos
+
+            </a>
+
+            <a asp-controller="Tecnico"
+               asp-action="TrabajosAsignados"
+               asp-route-estado="Asignado"
+               class="filtro-btn @(estadoSeleccionado == "Asignado" ? "activo" : "")">
+
+                <i class="bi bi-hourglass-split"></i>
+                Pendientes
+
+            </a>
+
+            <a asp-controller="Tecnico"
+               asp-action="TrabajosAsignados"
+               asp-route-estado="En Proceso"
+               class="filtro-btn @(estadoSeleccionado == "En Proceso" ? "activo" : "")">
+
+                <i class="bi bi-arrow-repeat"></i>
+                En proceso
+
+            </a>
+
+            <a asp-controller="Tecnico"
+               asp-action="TrabajosAsignados"
+               asp-route-estado="Finalizado"
+               class="filtro-btn @(estadoSeleccionado == "Finalizado" ? "activo" : "")">
+
+                <i class="bi bi-check-circle"></i>
+                Finalizados
+
+            </a>
+
+        </nav>
+
         <section class="resumen-grid">
 
-            <div class="resumen">
-                <div class="resumen-icon icon-pending">
-                    <i class="bi bi-hourglass-split"></i>
+            <a asp-controller="Tecnico"
+               asp-action="TrabajosAsignados"
+               asp-route-estado="Asignado"
+               class="resumen-enlace">
+
+                <div class="resumen @(estadoSeleccionado == "Asignado" ? "seleccionado" : "")">
+
+                    <div class="resumen-icon icon-pending">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+
+                    <div>
+                        <small>Pendientes</small>
+                        <strong>@asignados</strong>
+                    </div>
+
                 </div>
 
-                <div>
-                    <small>Pendientes</small>
-                    <strong>@asignados</strong>
-                </div>
-            </div>
+            </a>
 
-            <div class="resumen">
-                <div class="resumen-icon icon-process">
-                    <i class="bi bi-arrow-repeat"></i>
-                </div>
+            <a asp-controller="Tecnico"
+               asp-action="TrabajosAsignados"
+               asp-route-estado="En Proceso"
+               class="resumen-enlace">
 
-                <div>
-                    <small>En proceso</small>
-                    <strong>@proceso</strong>
-                </div>
-            </div>
+                <div class="resumen @(estadoSeleccionado == "En Proceso" ? "seleccionado" : "")">
 
-            <div class="resumen">
-                <div class="resumen-icon icon-finished">
-                    <i class="bi bi-check-circle-fill"></i>
+                    <div class="resumen-icon icon-process">
+                        <i class="bi bi-arrow-repeat"></i>
+                    </div>
+
+                    <div>
+                        <small>En proceso</small>
+                        <strong>@proceso</strong>
+                    </div>
+
                 </div>
 
-                <div>
-                    <small>Finalizados</small>
-                    <strong>@finalizados</strong>
+            </a>
+
+            <a asp-controller="Tecnico"
+               asp-action="TrabajosAsignados"
+               asp-route-estado="Finalizado"
+               class="resumen-enlace">
+
+                <div class="resumen @(estadoSeleccionado == "Finalizado" ? "seleccionado" : "")">
+
+                    <div class="resumen-icon icon-finished">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+
+                    <div>
+                        <small>Finalizados</small>
+                        <strong>@finalizados</strong>
+                    </div>
+
                 </div>
-            </div>
+
+            </a>
 
         </section>
 
-        <div class="card">
+        <main class="tabla-card">
+
+            <div class="tabla-encabezado">
+
+                <h3>Listado de trabajos</h3>
+
+                <span>
+                    Registros encontrados: @(Model?.Count ?? 0)
+                </span>
+
+            </div>
 
             @if (Model == null || !Model.Any())
             {
@@ -353,35 +582,57 @@
 
                             @foreach (var item in Model)
                             {
+                                string nombreCliente =
+                                item.SolicitudServicio?.Cliente?.Usuario?.NombreUsuario
+                                ?? "Cliente no disponible";
+
+                                string correoCliente =
+                                item.SolicitudServicio?.Cliente?.Usuario?.Correo
+                                ?? "";
+
                                 <tr>
 
                                     <td>
                                         <span class="request-code">
-                                            SOL-@item.IdSolicitud.ToString("00000")
+                                            SOL-@item.IdSolicitud.ToString("D5")
                                         </span>
                                     </td>
 
                                     <td>
+
                                         <div class="client-name">
-                                            @(item.SolicitudServicio?.Cliente?.Usuario?.NombreUsuario
-                                                                                ?? "Cliente no disponible")
-                                </div>
+                                            @nombreCliente
+                                        </div>
+
+                                        @if (!string.IsNullOrWhiteSpace(correoCliente))
+                                        {
+                                            <div class="client-email">
+                                                @correoCliente
+                                            </div>
+                                        }
+
+                                </td>
+
+                                <td>
+                                    @(string.IsNullOrWhiteSpace(item.TipoTrabajo)
+                                                                    ? "Trabajo técnico"
+                                                                    : item.TipoTrabajo)
                             </td>
 
                                     <td>
-                                        @item.TipoTrabajo
-                                    </td>
 
-                                    <td>
                                         @item.FechaAsignacion.ToString("dd/MM/yyyy")
+
                                         <br />
 
                                         <small class="text-muted">
                                             @item.FechaAsignacion.ToString("hh:mm tt")
                                         </small>
+
                                     </td>
 
                                     <td>
+
                                 @if (item.Estado == "Asignado")
                                         {
                                             <span class="status-badge status-assigned">
@@ -396,24 +647,43 @@
                                                 En proceso
                                             </span>
                                         }
-                                        else
+                                        else if (item.Estado == "Finalizado")
                                         {
                                             <span class="status-badge status-finished">
                                                 <i class="bi bi-check-circle-fill"></i>
                                                 Finalizado
                                             </span>
                                         }
+                                        else
+                                        {
+                                            <span class="status-badge status-other">
+                                                <i class="bi bi-info-circle"></i>
+                                                @item.Estado
+                                            </span>
+                                        }
+
                                     </td>
 
                                     <td>
+
                                         <a asp-controller="Tecnico"
                                            asp-action="DetalleTrabajo"
                                            asp-route-id="@item.IdAsignacion"
-                                           class="btn btn-info btn-sm text-white">
+                                           class="btn-abrir">
 
                                             <i class="bi bi-folder2-open"></i>
-                                            Abrir trabajo
+
+                                            @if (item.Estado == "Finalizado")
+                                            {
+                                                <span>Ver resultado</span>
+                                            }
+                                            else
+                                            {
+                                                <span>Abrir trabajo</span>
+                                            }
+
                                         </a>
+
                                     </td>
 
                                 </tr>
@@ -426,7 +696,7 @@
                 </div>
             }
 
-        </div>
+        </main>
 
     </div>
 

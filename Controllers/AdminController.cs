@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using InapaWeb.Data;
 using InapaWeb.Models;
@@ -8,74 +9,109 @@ namespace InapaWeb.Controllers
     public class AdminController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly PasswordHasher<Usuario> _passwordHasher;
 
         public AdminController(ApplicationDbContext context)
         {
             _context = context;
+            _passwordHasher = new PasswordHasher<Usuario>();
         }
 
-        // =========================================================
-        // PANEL PRINCIPAL
-        // =========================================================
+
+        private bool EsAdministrador()
+        {
+            return HttpContext.Session.GetString("RolUsuario")
+                   == "Administrador";
+        }
+
+        private IActionResult RedirigirAlLogin()
+        {
+            return RedirectToAction("Login", "Acceso");
+        }
+
 
         public IActionResult Index()
         {
+            if (!EsAdministrador())
+            {
+                return RedirigirAlLogin();
+            }
+
             ViewBag.NombreUsuario =
                 HttpContext.Session.GetString("NombreUsuario")
                 ?? "Administrador";
 
-            ViewBag.TotalUsuarios = _context.Usuarios.Count();
+            ViewBag.TotalUsuarios =
+                _context.Usuarios.Count();
 
-            ViewBag.TotalContratos = _context.Contratos.Count();
+            ViewBag.TotalContratos =
+                _context.Contratos.Count();
 
-            ViewBag.TotalAverias = _context.Averias.Count();
+            ViewBag.TotalAverias =
+                _context.Averias.Count();
 
-            ViewBag.TotalReclamaciones = _context.Reclamaciones.Count();
+            ViewBag.TotalReclamaciones =
+                _context.Reclamaciones.Count();
 
-            ViewBag.TotalFacturas = _context.Facturas.Count();
+            ViewBag.TotalFacturas =
+                _context.Facturas.Count();
 
-            // IMPORTANTE:
-            // Solo cuenta solicitudes de servicio que estén pendientes.
-            ViewBag.TotalSolicitudes = _context.SolicitudesServicio
-                .Count(s => s.Estado == "Pendiente");
+            ViewBag.TotalSolicitudes =
+                _context.SolicitudesServicio
+                    .Count(s => s.Estado == "Pendiente");
 
-            // Solo cuenta solicitudes de contrato pendientes.
-            ViewBag.TotalSolicitudesContrato = _context.SolicitudesContrato
-                .Count(s => s.Estado == "Pendiente");
+            ViewBag.TotalSolicitudesContrato =
+                _context.SolicitudesContrato
+                    .Count(s => s.Estado == "Pendiente");
 
-            // Solicitudes pendientes para mostrarlas en el panel.
-            ViewBag.SolicitudesRecientes = _context.SolicitudesServicio
-                .Include(s => s.Cliente)
-                    .ThenInclude(c => c.Usuario)
-                .Where(s => s.Estado == "Pendiente")
-                .OrderByDescending(s => s.FechaSolicitud)
-                .Take(5)
-                .ToList();
+            ViewBag.SolicitudesRecientes =
+                _context.SolicitudesServicio
+                    .Include(s => s.Cliente)
+                        .ThenInclude(c => c.Usuario)
+                    .Where(s => s.Estado == "Pendiente")
+                    .OrderByDescending(s => s.FechaSolicitud)
+                    .Take(5)
+                    .ToList();
 
-            // Solicitudes aprobadas que todavía necesitan técnico.
-            ViewBag.SolicitudesParaAsignar = _context.SolicitudesServicio
-                .Include(s => s.Cliente)
-                    .ThenInclude(c => c.Usuario)
-                .Where(s =>
-                    s.Estado == "Aprobada" &&
-                    !_context.AsignacionesTecnicos.Any(a =>
-                        a.IdSolicitud == s.IdSolicitud &&
-                        a.Estado != "Finalizado"))
-                .OrderByDescending(s => s.FechaSolicitud)
-                .Take(5)
-                .ToList();
+            /*
+             * Estas solicitudes se muestran únicamente
+             * como información administrativa.
+             *
+             * La asignación será realizada por el
+             * Coordinador Técnico.
+             */
+            ViewBag.SolicitudesParaAsignar =
+                _context.SolicitudesServicio
+                    .Include(s => s.Cliente)
+                        .ThenInclude(c => c.Usuario)
+                    .Where(s =>
+                        s.Estado == "Aprobada" &&
+                        !_context.AsignacionesTecnicos.Any(a =>
+                            a.IdSolicitud == s.IdSolicitud &&
+                            a.Estado != "Finalizado"))
+                    .OrderByDescending(s => s.FechaSolicitud)
+                    .Take(5)
+                    .ToList();
 
             return View();
         }
 
- 
+
 
         public IActionResult Usuarios(string? buscar)
         {
-            var usuarios = _context.Usuarios.AsQueryable();
+            if (!EsAdministrador())
+            {
+                return RedirigirAlLogin();
+            }
+
+            var usuarios =
+                _context.Usuarios.AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(buscar))
             {
+                buscar = buscar.Trim();
+
                 usuarios = usuarios.Where(u =>
                     u.NombreUsuario.Contains(buscar) ||
                     u.Correo.Contains(buscar) ||
@@ -91,17 +127,36 @@ namespace InapaWeb.Controllers
                     .ToList()
             );
         }
-     
+
+
+
         [HttpGet]
         public IActionResult CrearUsuario()
         {
-            return View(new Usuario());
+            if (!EsAdministrador())
+            {
+                return RedirigirAlLogin();
+            }
+
+            return View(new Usuario
+            {
+                Estado = "Activo",
+                OrigenRegistro = "Oficina",
+                DebeCambiarClave = false
+            });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult CrearUsuario(Usuario usuario)
         {
+            if (!EsAdministrador())
+            {
+                return RedirigirAlLogin();
+            }
+
+            PrepararUsuarioInterno(usuario);
+
             if (string.IsNullOrWhiteSpace(usuario.NombreUsuario) ||
                 string.IsNullOrWhiteSpace(usuario.Correo) ||
                 string.IsNullOrWhiteSpace(usuario.Contrasena) ||
@@ -113,12 +168,30 @@ namespace InapaWeb.Controllers
                 return View(usuario);
             }
 
-            usuario.NombreUsuario = usuario.NombreUsuario.Trim();
-            usuario.Correo = usuario.Correo.Trim().ToLower();
-            usuario.Rol = usuario.Rol.Trim();
+            usuario.NombreUsuario =
+                usuario.NombreUsuario.Trim();
 
-            bool correoExiste = _context.Usuarios
-                .Any(u => u.Correo.ToLower() == usuario.Correo);
+            usuario.Correo =
+                usuario.Correo.Trim().ToLowerInvariant();
+
+            usuario.Rol =
+                usuario.Rol.Trim();
+
+            string contrasenaTemporal =
+                usuario.Contrasena.Trim();
+
+            if (contrasenaTemporal.Length < 8)
+            {
+                ViewBag.Error =
+                    "La contraseña debe tener al menos 8 caracteres.";
+
+                return View(usuario);
+            }
+
+            bool correoExiste =
+                _context.Usuarios.Any(u =>
+                    u.Correo.ToLower() ==
+                    usuario.Correo.ToLower());
 
             if (correoExiste)
             {
@@ -128,144 +201,289 @@ namespace InapaWeb.Controllers
                 return View(usuario);
             }
 
-            usuario.Estado = string.IsNullOrWhiteSpace(usuario.Estado)
-                ? "Activo"
-                : usuario.Estado;
+            string[] rolesPermitidos =
+            {
+                "Técnico",
+                "Coordinador Técnico",
+                "Cajero",
+                "Supervisor",
+                "AtencionCliente"
+            };
+
+            if (!rolesPermitidos.Contains(usuario.Rol))
+            {
+                ViewBag.Error =
+                    "El rol seleccionado no es válido.";
+
+                return View(usuario);
+            }
+
+            /*
+             * El Administrador crea solamente usuarios internos.
+             *
+             * Los clientes registrados presencialmente serán
+             * creados desde Atención al Cliente.
+             */
+            usuario.Estado = "Activo";
+            usuario.OrigenRegistro = "Oficina";
+            usuario.DebeCambiarClave = false;
+
+            usuario.Contrasena =
+                _passwordHasher.HashPassword(
+                    usuario,
+                    contrasenaTemporal
+                );
 
             _context.Usuarios.Add(usuario);
             _context.SaveChanges();
 
             TempData["MensajeUsuario"] =
-                "El usuario fue creado correctamente.";
+                "Usuario interno creado correctamente.";
 
             return RedirectToAction(nameof(Usuarios));
         }
 
+        private static void PrepararUsuarioInterno(
+            Usuario usuario)
+        {
+            usuario.Estado = "Activo";
+            usuario.OrigenRegistro = "Oficina";
+            usuario.DebeCambiarClave = false;
+        }
 
 
         public IActionResult AprobarUsuario(int id)
         {
-            var usuario = _context.Usuarios
-                .FirstOrDefault(u => u.IdUsuario == id);
-
-            if (usuario != null)
+            if (!EsAdministrador())
             {
-                usuario.Estado = "Activo";
-
-                var cliente = _context.Clientes
-                    .FirstOrDefault(c => c.IdUsuario == id);
-
-                if (cliente != null)
-                {
-                    cliente.EstadoCliente = "Activo";
-                }
-
-                _context.SaveChanges();
+                return RedirigirAlLogin();
             }
 
-            return RedirectToAction(nameof(Usuarios));
-        }
-
-        public IActionResult RechazarUsuario(int id)
-        {
-            var usuario = _context.Usuarios
-                .FirstOrDefault(u => u.IdUsuario == id);
-
-            if (usuario != null)
-            {
-                usuario.Estado = "Rechazado";
-
-                var cliente = _context.Clientes
-                    .FirstOrDefault(c => c.IdUsuario == id);
-
-                if (cliente != null)
-                {
-                    cliente.EstadoCliente = "Rechazado";
-                }
-
-                _context.SaveChanges();
-            }
-
-            return RedirectToAction(nameof(Usuarios));
-        }
-
-        public IActionResult CambiarEstado(int id)
-        {
-            var usuario = _context.Usuarios
-                .FirstOrDefault(u => u.IdUsuario == id);
-
-            if (usuario != null)
-            {
-                usuario.Estado =
-                    usuario.Estado == "Activo"
-                        ? "Inactivo"
-                        : "Activo";
-
-                var cliente = _context.Clientes
-                    .FirstOrDefault(c => c.IdUsuario == id);
-
-                if (cliente != null)
-                {
-                    cliente.EstadoCliente = usuario.Estado;
-                }
-
-                _context.SaveChanges();
-            }
-
-            return RedirectToAction(nameof(Usuarios));
-        }
-
-        public IActionResult DetalleUsuario(int id)
-        {
-            var usuario = _context.Usuarios
-                .FirstOrDefault(u => u.IdUsuario == id);
+            var usuario =
+                _context.Usuarios
+                    .FirstOrDefault(u =>
+                        u.IdUsuario == id);
 
             if (usuario == null)
             {
+                TempData["ErrorUsuario"] =
+                    "El usuario seleccionado no existe.";
+
                 return RedirectToAction(nameof(Usuarios));
             }
 
-            ViewBag.Cliente = _context.Clientes
-                .Include(c => c.Tarifa)
-                .FirstOrDefault(c => c.IdUsuario == id);
+            usuario.Estado = "Activo";
+
+            var cliente =
+                _context.Clientes
+                    .FirstOrDefault(c =>
+                        c.IdUsuario == id);
+
+            if (cliente != null)
+            {
+                cliente.EstadoCliente = "Activo";
+            }
+
+            _context.SaveChanges();
+
+            TempData["MensajeUsuario"] =
+                "Usuario aprobado correctamente.";
+
+            return RedirectToAction(nameof(Usuarios));
+        }
+
+
+
+        public IActionResult RechazarUsuario(int id)
+        {
+            if (!EsAdministrador())
+            {
+                return RedirigirAlLogin();
+            }
+
+            var usuario =
+                _context.Usuarios
+                    .FirstOrDefault(u =>
+                        u.IdUsuario == id);
+
+            if (usuario == null)
+            {
+                TempData["ErrorUsuario"] =
+                    "El usuario seleccionado no existe.";
+
+                return RedirectToAction(nameof(Usuarios));
+            }
+
+            usuario.Estado = "Rechazado";
+
+            var cliente =
+                _context.Clientes
+                    .FirstOrDefault(c =>
+                        c.IdUsuario == id);
+
+            if (cliente != null)
+            {
+                cliente.EstadoCliente = "Rechazado";
+            }
+
+            _context.SaveChanges();
+
+            TempData["MensajeUsuario"] =
+                "Usuario rechazado correctamente.";
+
+            return RedirectToAction(nameof(Usuarios));
+        }
+
+
+
+        public IActionResult CambiarEstado(int id)
+        {
+            if (!EsAdministrador())
+            {
+                return RedirigirAlLogin();
+            }
+
+            int? usuarioActualId =
+                HttpContext.Session.GetInt32("UsuarioId");
+
+            if (usuarioActualId == id)
+            {
+                TempData["ErrorUsuario"] =
+                    "No puede cambiar el estado de su propia cuenta.";
+
+                return RedirectToAction(nameof(Usuarios));
+            }
+
+            var usuario =
+                _context.Usuarios
+                    .FirstOrDefault(u =>
+                        u.IdUsuario == id);
+
+            if (usuario == null)
+            {
+                TempData["ErrorUsuario"] =
+                    "El usuario seleccionado no existe.";
+
+                return RedirectToAction(nameof(Usuarios));
+            }
+
+            usuario.Estado =
+                usuario.Estado == "Activo"
+                    ? "Inactivo"
+                    : "Activo";
+
+            var cliente =
+                _context.Clientes
+                    .FirstOrDefault(c =>
+                        c.IdUsuario == id);
+
+            if (cliente != null)
+            {
+                cliente.EstadoCliente =
+                    usuario.Estado;
+            }
+
+            _context.SaveChanges();
+
+            TempData["MensajeUsuario"] =
+                "Estado actualizado correctamente.";
+
+            return RedirectToAction(nameof(Usuarios));
+        }
+
+
+        public IActionResult DetalleUsuario(int id)
+        {
+            if (!EsAdministrador())
+            {
+                return RedirigirAlLogin();
+            }
+
+            var usuario =
+                _context.Usuarios
+                    .FirstOrDefault(u =>
+                        u.IdUsuario == id);
+
+            if (usuario == null)
+            {
+                TempData["ErrorUsuario"] =
+                    "El usuario seleccionado no existe.";
+
+                return RedirectToAction(nameof(Usuarios));
+            }
+
+            ViewBag.Cliente =
+                _context.Clientes
+                    .Include(c => c.Tarifa)
+                    .FirstOrDefault(c =>
+                        c.IdUsuario == id);
 
             return View(usuario);
         }
 
+
+
         public IActionResult EliminarUsuario(int id)
         {
-            var cliente = _context.Clientes
-                .FirstOrDefault(c => c.IdUsuario == id);
+            if (!EsAdministrador())
+            {
+                return RedirigirAlLogin();
+            }
+
+            int? usuarioActualId =
+                HttpContext.Session.GetInt32("UsuarioId");
+
+            if (usuarioActualId == id)
+            {
+                TempData["ErrorUsuario"] =
+                    "No puede eliminar su propia cuenta.";
+
+                return RedirectToAction(nameof(Usuarios));
+            }
+
+            var usuario =
+                _context.Usuarios
+                    .FirstOrDefault(u =>
+                        u.IdUsuario == id);
+
+            if (usuario == null)
+            {
+                TempData["ErrorUsuario"] =
+                    "El usuario seleccionado no existe.";
+
+                return RedirectToAction(nameof(Usuarios));
+            }
+
+            var cliente =
+                _context.Clientes
+                    .FirstOrDefault(c =>
+                        c.IdUsuario == id);
 
             if (cliente != null)
             {
                 bool tieneSolicitudesServicio =
-                    _context.SolicitudesServicio
-                        .Any(s => s.IdCliente == cliente.IdCliente);
+                    _context.SolicitudesServicio.Any(s =>
+                        s.IdCliente == cliente.IdCliente);
 
                 bool tieneSolicitudesContrato =
-                    _context.SolicitudesContrato
-                        .Any(s => s.IdCliente == cliente.IdCliente);
+                    _context.SolicitudesContrato.Any(s =>
+                        s.IdCliente == cliente.IdCliente);
 
                 bool tieneContratos =
-                    _context.Contratos
-                        .Any(c => c.IdCliente == cliente.IdCliente);
+                    _context.Contratos.Any(c =>
+                        c.IdCliente == cliente.IdCliente);
 
                 if (tieneSolicitudesServicio ||
                     tieneSolicitudesContrato ||
                     tieneContratos)
                 {
                     cliente.EstadoCliente = "Inactivo";
-
-                    var usuarioRelacionado = _context.Usuarios
-                        .FirstOrDefault(u => u.IdUsuario == id);
-
-                    if (usuarioRelacionado != null)
-                    {
-                        usuarioRelacionado.Estado = "Inactivo";
-                    }
+                    usuario.Estado = "Inactivo";
 
                     _context.SaveChanges();
+
+                    TempData["MensajeUsuario"] =
+                        "El usuario posee información relacionada y fue desactivado.";
 
                     return RedirectToAction(nameof(Usuarios));
                 }
@@ -273,43 +491,59 @@ namespace InapaWeb.Controllers
                 _context.Clientes.Remove(cliente);
             }
 
-            var usuario = _context.Usuarios
-                .FirstOrDefault(u => u.IdUsuario == id);
+            bool tieneAsignaciones =
+                _context.AsignacionesTecnicos.Any(a =>
+                    a.IdTecnico == id);
 
-            if (usuario != null)
+            if (tieneAsignaciones)
             {
-                _context.Usuarios.Remove(usuario);
+                usuario.Estado = "Inactivo";
+
+                _context.SaveChanges();
+
+                TempData["MensajeUsuario"] =
+                    "El usuario posee trabajos relacionados y fue desactivado.";
+
+                return RedirectToAction(nameof(Usuarios));
             }
 
+            _context.Usuarios.Remove(usuario);
             _context.SaveChanges();
+
+            TempData["MensajeUsuario"] =
+                "Usuario eliminado correctamente.";
 
             return RedirectToAction(nameof(Usuarios));
         }
 
-        // =========================================================
-        // SOLICITUDES DE SERVICIO
-        // =========================================================
 
         public IActionResult Solicitudes(
             string? buscar,
             string estado = "Pendiente")
         {
-            var solicitudes = _context.SolicitudesServicio
-                .Include(s => s.Cliente)
-                    .ThenInclude(c => c.Usuario)
-                .AsQueryable();
+            if (!EsAdministrador())
+            {
+                return RedirigirAlLogin();
+            }
 
-            // Por defecto muestra solamente las pendientes.
-            // Puede usar estado=Todos para mostrar todas.
+            var solicitudes =
+                _context.SolicitudesServicio
+                    .Include(s => s.Cliente)
+                        .ThenInclude(c => c.Usuario)
+                    .AsQueryable();
+
             if (!string.IsNullOrWhiteSpace(estado) &&
                 estado != "Todos")
             {
-                solicitudes = solicitudes
-                    .Where(s => s.Estado == estado);
+                solicitudes =
+                    solicitudes.Where(s =>
+                        s.Estado == estado);
             }
 
             if (!string.IsNullOrWhiteSpace(buscar))
             {
+                buscar = buscar.Trim();
+
                 solicitudes = solicitudes.Where(s =>
                     s.Cliente.Usuario.NombreUsuario.Contains(buscar) ||
                     s.TipoSolicitud.Contains(buscar) ||
@@ -319,14 +553,17 @@ namespace InapaWeb.Controllers
             ViewBag.Buscar = buscar;
             ViewBag.EstadoSeleccionado = estado;
 
-            ViewBag.TotalPendientes = _context.SolicitudesServicio
-                .Count(s => s.Estado == "Pendiente");
+            ViewBag.TotalPendientes =
+                _context.SolicitudesServicio
+                    .Count(s => s.Estado == "Pendiente");
 
-            ViewBag.TotalAprobadas = _context.SolicitudesServicio
-                .Count(s => s.Estado == "Aprobada");
+            ViewBag.TotalAprobadas =
+                _context.SolicitudesServicio
+                    .Count(s => s.Estado == "Aprobada");
 
-            ViewBag.TotalAsignadas = _context.SolicitudesServicio
-                .Count(s => s.Estado == "Asignada");
+            ViewBag.TotalAsignadas =
+                _context.SolicitudesServicio
+                    .Count(s => s.Estado == "Asignada");
 
             return View(
                 solicitudes
@@ -335,10 +572,19 @@ namespace InapaWeb.Controllers
             );
         }
 
+
+
         public IActionResult AprobarSolicitud(int id)
         {
-            var solicitud = _context.SolicitudesServicio
-                .FirstOrDefault(s => s.IdSolicitud == id);
+            if (!EsAdministrador())
+            {
+                return RedirigirAlLogin();
+            }
+
+            var solicitud =
+                _context.SolicitudesServicio
+                    .FirstOrDefault(s =>
+                        s.IdSolicitud == id);
 
             if (solicitud == null)
             {
@@ -359,25 +605,32 @@ namespace InapaWeb.Controllers
             solicitud.Estado = "Aprobada";
 
             solicitud.ObservacionAdministrador =
-                "Solicitud aprobada. Pendiente de asignación de técnico.";
+                "Solicitud aprobada. Pendiente de coordinación técnica.";
 
             _context.SaveChanges();
 
             TempData["MensajeSolicitud"] =
-                "Solicitud aprobada correctamente. Ahora debe asignar un técnico.";
+                "Solicitud aprobada correctamente. El Coordinador Técnico podrá realizar la asignación.";
 
-            // Después de aprobar, abre directamente la pantalla
-            // para asignar el técnico.
             return RedirectToAction(
-                nameof(AsignarTecnico),
-                new { id = solicitud.IdSolicitud }
+                nameof(Solicitudes),
+                new { estado = "Aprobada" }
             );
         }
 
+
+
         public IActionResult RechazarSolicitud(int id)
         {
-            var solicitud = _context.SolicitudesServicio
-                .FirstOrDefault(s => s.IdSolicitud == id);
+            if (!EsAdministrador())
+            {
+                return RedirigirAlLogin();
+            }
+
+            var solicitud =
+                _context.SolicitudesServicio
+                    .FirstOrDefault(s =>
+                        s.IdSolicitud == id);
 
             if (solicitud == null)
             {
@@ -403,39 +656,58 @@ namespace InapaWeb.Controllers
             _context.SaveChanges();
 
             TempData["MensajeSolicitud"] =
-                "La solicitud fue rechazada correctamente.";
+                "Solicitud rechazada correctamente.";
 
             return RedirectToAction(nameof(Solicitudes));
         }
 
+
+
         public IActionResult DetalleSolicitud(int id)
         {
-            var solicitud = _context.SolicitudesServicio
-                .Include(s => s.Cliente)
-                    .ThenInclude(c => c.Usuario)
-                .FirstOrDefault(s => s.IdSolicitud == id);
+            if (!EsAdministrador())
+            {
+                return RedirigirAlLogin();
+            }
+
+            var solicitud =
+                _context.SolicitudesServicio
+                    .Include(s => s.Cliente)
+                        .ThenInclude(c => c.Usuario)
+                    .FirstOrDefault(s =>
+                        s.IdSolicitud == id);
 
             if (solicitud == null)
             {
+                TempData["ErrorSolicitud"] =
+                    "La solicitud seleccionada no existe.";
+
                 return RedirectToAction(nameof(Solicitudes));
             }
 
             return View(solicitud);
         }
 
-        // =========================================================
-        // SOLICITUDES DE CONTRATO
-        // =========================================================
 
-        public IActionResult SolicitudesContrato(string? buscar)
+
+        public IActionResult SolicitudesContrato(
+            string? buscar)
         {
-            var solicitudes = _context.SolicitudesContrato
-                .Include(s => s.Cliente)
-                    .ThenInclude(c => c.Usuario)
-                .AsQueryable();
+            if (!EsAdministrador())
+            {
+                return RedirigirAlLogin();
+            }
+
+            var solicitudes =
+                _context.SolicitudesContrato
+                    .Include(s => s.Cliente)
+                        .ThenInclude(c => c.Usuario)
+                    .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(buscar))
             {
+                buscar = buscar.Trim();
+
                 solicitudes = solicitudes.Where(s =>
                     s.Cliente.Usuario.NombreUsuario.Contains(buscar) ||
                     s.Cliente.Usuario.Correo.Contains(buscar) ||
@@ -453,19 +725,29 @@ namespace InapaWeb.Controllers
             );
         }
 
-        public IActionResult AprobarSolicitudContrato(int id)
+
+        public IActionResult AprobarSolicitudContrato(
+            int id)
         {
-            var solicitudContrato = _context.SolicitudesContrato
-                .Include(s => s.Cliente)
-                .FirstOrDefault(s =>
-                    s.IdSolicitudContrato == id);
+            if (!EsAdministrador())
+            {
+                return RedirigirAlLogin();
+            }
+
+            var solicitudContrato =
+                _context.SolicitudesContrato
+                    .Include(s => s.Cliente)
+                    .FirstOrDefault(s =>
+                        s.IdSolicitudContrato == id);
 
             if (solicitudContrato == null)
             {
                 TempData["ErrorSolicitudContrato"] =
                     "La solicitud de contrato no existe.";
 
-                return RedirectToAction(nameof(SolicitudesContrato));
+                return RedirectToAction(
+                    nameof(SolicitudesContrato)
+                );
             }
 
             if (solicitudContrato.Estado != "Pendiente")
@@ -473,12 +755,15 @@ namespace InapaWeb.Controllers
                 TempData["ErrorSolicitudContrato"] =
                     "La solicitud de contrato ya fue procesada.";
 
-                return RedirectToAction(nameof(SolicitudesContrato));
+                return RedirectToAction(
+                    nameof(SolicitudesContrato)
+                );
             }
 
             bool yaExisteSolicitudServicio =
                 _context.SolicitudesServicio.Any(s =>
-                    s.IdCliente == solicitudContrato.IdCliente &&
+                    s.IdCliente ==
+                    solicitudContrato.IdCliente &&
                     s.TipoSolicitud.Contains(
                         $"SC-{solicitudContrato.IdSolicitudContrato}") &&
                     s.Estado != "Rechazada");
@@ -488,7 +773,9 @@ namespace InapaWeb.Controllers
                 TempData["ErrorSolicitudContrato"] =
                     "Esta solicitud ya generó un proceso de servicio.";
 
-                return RedirectToAction(nameof(SolicitudesContrato));
+                return RedirectToAction(
+                    nameof(SolicitudesContrato)
+                );
             }
 
             using var transaccion =
@@ -499,7 +786,7 @@ namespace InapaWeb.Controllers
                 solicitudContrato.Estado = "Aprobada";
 
                 solicitudContrato.ObservacionAdministrador =
-                    "Solicitud de contrato aprobada. Pendiente de levantamiento técnico.";
+                    "Solicitud aprobada. Pendiente de levantamiento técnico.";
 
                 string descripcion =
                     $"Solicitud de contrato SC-{solicitudContrato.IdSolicitudContrato}. " +
@@ -511,41 +798,40 @@ namespace InapaWeb.Controllers
                 {
                     descripcion +=
                         $" Observación del cliente: " +
-                        $"{solicitudContrato.ObservacionCliente}";
+                        solicitudContrato.ObservacionCliente;
                 }
 
-                var solicitudServicio = new SolicitudServicio
-                {
-                    IdCliente = solicitudContrato.IdCliente,
+                var solicitudServicio =
+                    new SolicitudServicio
+                    {
+                        IdCliente =
+                            solicitudContrato.IdCliente,
 
-                    TipoSolicitud =
-                        $"Contrato SC-{solicitudContrato.IdSolicitudContrato}",
+                        TipoSolicitud =
+                            $"Contrato SC-{solicitudContrato.IdSolicitudContrato}",
 
-                    Descripcion = descripcion,
+                        Descripcion = descripcion,
 
-                    FechaSolicitud = DateTime.Now,
+                        FechaSolicitud = DateTime.Now,
 
-                    // La solicitud ya fue aprobada.
-                    // No debe aparecer como pendiente.
-                    Estado = "Aprobada",
+                        Estado = "Aprobada",
 
-                    ObservacionAdministrador =
-                        "Solicitud aprobada. Pendiente de asignación de técnico para levantamiento."
-                };
+                        ObservacionAdministrador =
+                            "Solicitud aprobada. Pendiente de coordinación técnica para el levantamiento."
+                    };
 
-                _context.SolicitudesServicio.Add(solicitudServicio);
+                _context.SolicitudesServicio
+                    .Add(solicitudServicio);
 
                 _context.SaveChanges();
 
                 transaccion.Commit();
 
                 TempData["MensajeSolicitudContrato"] =
-                    "Solicitud aprobada. Ahora debe asignar un técnico.";
+                    "Solicitud aprobada. Quedó disponible para el Coordinador Técnico.";
 
-                // Envía directamente a asignar el técnico.
                 return RedirectToAction(
-                    nameof(AsignarTecnico),
-                    new { id = solicitudServicio.IdSolicitud }
+                    nameof(SolicitudesContrato)
                 );
             }
             catch (Exception)
@@ -555,22 +841,35 @@ namespace InapaWeb.Controllers
                 TempData["ErrorSolicitudContrato"] =
                     "No fue posible aprobar la solicitud de contrato.";
 
-                return RedirectToAction(nameof(SolicitudesContrato));
+                return RedirectToAction(
+                    nameof(SolicitudesContrato)
+                );
             }
         }
 
-        public IActionResult RechazarSolicitudContrato(int id)
+
+
+        public IActionResult RechazarSolicitudContrato(
+            int id)
         {
-            var solicitud = _context.SolicitudesContrato
-                .FirstOrDefault(s =>
-                    s.IdSolicitudContrato == id);
+            if (!EsAdministrador())
+            {
+                return RedirigirAlLogin();
+            }
+
+            var solicitud =
+                _context.SolicitudesContrato
+                    .FirstOrDefault(s =>
+                        s.IdSolicitudContrato == id);
 
             if (solicitud == null)
             {
                 TempData["ErrorSolicitudContrato"] =
                     "La solicitud de contrato no existe.";
 
-                return RedirectToAction(nameof(SolicitudesContrato));
+                return RedirectToAction(
+                    nameof(SolicitudesContrato)
+                );
             }
 
             if (solicitud.Estado != "Pendiente")
@@ -578,245 +877,90 @@ namespace InapaWeb.Controllers
                 TempData["ErrorSolicitudContrato"] =
                     "La solicitud ya fue procesada anteriormente.";
 
-                return RedirectToAction(nameof(SolicitudesContrato));
+                return RedirectToAction(
+                    nameof(SolicitudesContrato)
+                );
             }
 
             solicitud.Estado = "Rechazada";
 
             solicitud.ObservacionAdministrador =
-                "Solicitud de contrato rechazada por el administrador.";
+                "Solicitud rechazada por el administrador.";
 
             _context.SaveChanges();
 
             TempData["MensajeSolicitudContrato"] =
-                "La solicitud de contrato fue rechazada.";
+                "Solicitud de contrato rechazada.";
 
-            return RedirectToAction(nameof(SolicitudesContrato));
+            return RedirectToAction(
+                nameof(SolicitudesContrato)
+            );
         }
 
-        // =========================================================
-        // LEVANTAMIENTOS Y ASIGNACIÓN TÉCNICA
-        // =========================================================
 
-        public IActionResult ResultadoLevantamiento(int id)
+
+        public IActionResult ResultadoLevantamiento(
+            int id)
         {
-            var trabajo = _context.AsignacionesTecnicos
-                .Include(a => a.SolicitudServicio)
-                    .ThenInclude(s => s.Cliente)
-                        .ThenInclude(c => c.Usuario)
-                .Include(a => a.Tecnico)
-                .FirstOrDefault(a =>
-                    a.IdSolicitud == id &&
-                    a.TipoTrabajo == "Levantamiento");
+            if (!EsAdministrador())
+            {
+                return RedirigirAlLogin();
+            }
+
+            var trabajo =
+                _context.AsignacionesTecnicos
+                    .Include(a => a.SolicitudServicio)
+                        .ThenInclude(s => s.Cliente)
+                            .ThenInclude(c => c.Usuario)
+                    .Include(a => a.Tecnico)
+                    .FirstOrDefault(a =>
+                        a.IdSolicitud == id &&
+                        a.TipoTrabajo == "Levantamiento");
 
             if (trabajo == null)
             {
+                TempData["ErrorSolicitud"] =
+                    "No se encontró el levantamiento solicitado.";
+
                 return RedirectToAction(nameof(Solicitudes));
             }
 
             return View(trabajo);
         }
 
-        public IActionResult AsignarTecnico(int id)
-        {
-            var solicitud = _context.SolicitudesServicio
-                .Include(s => s.Cliente)
-                    .ThenInclude(c => c.Usuario)
-                .FirstOrDefault(s => s.IdSolicitud == id);
-
-            if (solicitud == null)
-            {
-                TempData["ErrorSolicitud"] =
-                    "La solicitud seleccionada no existe.";
-
-                return RedirectToAction(nameof(Solicitudes));
-            }
-
-            if (solicitud.Estado != "Aprobada")
-            {
-                TempData["ErrorSolicitud"] =
-                    "Solo puede asignarse un técnico a una solicitud aprobada.";
-
-                return RedirectToAction(
-                    nameof(Solicitudes),
-                    new { estado = "Aprobada" }
-                );
-            }
-
-            bool yaTieneAsignacion =
-                _context.AsignacionesTecnicos.Any(a =>
-                    a.IdSolicitud == id &&
-                    a.Estado != "Finalizado");
-
-            if (yaTieneAsignacion)
-            {
-                TempData["ErrorSolicitud"] =
-                    "Esta solicitud ya tiene un técnico asignado.";
-
-                return RedirectToAction(
-                    nameof(Solicitudes),
-                    new { estado = "Asignada" }
-                );
-            }
-
-            ViewBag.Solicitud = solicitud;
-
-            ViewBag.Tecnicos = _context.Usuarios
-                .Where(u =>
-                    u.Rol == "Técnico" &&
-                    u.Estado == "Activo")
-                .OrderBy(u => u.NombreUsuario)
-                .ToList();
-
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult AsignarTecnico(
-            int idSolicitud,
-            int idTecnico,
-            string? observacion)
-        {
-            var solicitud = _context.SolicitudesServicio
-                .FirstOrDefault(s =>
-                    s.IdSolicitud == idSolicitud);
-
-            if (solicitud == null)
-            {
-                TempData["ErrorSolicitud"] =
-                    "La solicitud seleccionada no existe.";
-
-                return RedirectToAction(nameof(Solicitudes));
-            }
-
-            if (solicitud.Estado != "Aprobada")
-            {
-                TempData["ErrorSolicitud"] =
-                    "La solicitud no está disponible para asignación.";
-
-                return RedirectToAction(nameof(Solicitudes));
-            }
-
-            if (idTecnico <= 0)
-            {
-                TempData["ErrorAsignacion"] =
-                    "Debe seleccionar un técnico.";
-
-                return RedirectToAction(
-                    nameof(AsignarTecnico),
-                    new { id = idSolicitud }
-                );
-            }
-
-            var tecnico = _context.Usuarios
-                .FirstOrDefault(u =>
-                    u.IdUsuario == idTecnico &&
-                    u.Rol == "Técnico" &&
-                    u.Estado == "Activo");
-
-            if (tecnico == null)
-            {
-                TempData["ErrorAsignacion"] =
-                    "El técnico seleccionado no existe o no está activo.";
-
-                return RedirectToAction(
-                    nameof(AsignarTecnico),
-                    new { id = idSolicitud }
-                );
-            }
-
-            bool yaAsignada =
-                _context.AsignacionesTecnicos.Any(a =>
-                    a.IdSolicitud == idSolicitud &&
-                    a.Estado != "Finalizado");
-
-            if (yaAsignada)
-            {
-                TempData["ErrorSolicitud"] =
-                    "Esta solicitud ya tiene un técnico asignado.";
-
-                return RedirectToAction(
-                    nameof(Solicitudes),
-                    new { estado = "Asignada" }
-                );
-            }
-
-            using var transaccion =
-                _context.Database.BeginTransaction();
-
-            try
-            {
-                var asignacion = new AsignacionTecnico
-                {
-                    IdSolicitud = idSolicitud,
-                    IdTecnico = idTecnico,
-                    TipoTrabajo = "Levantamiento",
-                    FechaAsignacion = DateTime.Now,
-                    Estado = "Asignado",
-                    Observacion = observacion
-                };
-
-                _context.AsignacionesTecnicos.Add(asignacion);
-
-                solicitud.Estado = "Asignada";
-
-                solicitud.ObservacionAdministrador =
-                    $"Solicitud asignada al técnico {tecnico.NombreUsuario} " +
-                    $"para realizar el levantamiento.";
-
-                _context.SaveChanges();
-
-                transaccion.Commit();
-
-                TempData["MensajeSolicitud"] =
-                    "El técnico fue asignado correctamente.";
-
-                return RedirectToAction(
-                    nameof(Solicitudes),
-                    new { estado = "Asignada" }
-                );
-            }
-            catch (Exception)
-            {
-                transaccion.Rollback();
-
-                TempData["ErrorAsignacion"] =
-                    "No fue posible asignar el técnico.";
-
-                return RedirectToAction(
-                    nameof(AsignarTecnico),
-                    new { id = idSolicitud }
-                );
-            }
-        }
-
-        // =========================================================
-        // CATEGORIZACIÓN
-        // =========================================================
 
         public IActionResult CategorizarCliente(int id)
         {
-            var trabajo = _context.AsignacionesTecnicos
-                .Include(a => a.SolicitudServicio)
-                    .ThenInclude(s => s.Cliente)
-                        .ThenInclude(c => c.Usuario)
-                .Include(a => a.Tecnico)
-                .FirstOrDefault(a =>
-                    a.IdSolicitud == id &&
-                    a.TipoTrabajo == "Levantamiento" &&
-                    a.Estado == "Finalizado");
+            if (!EsAdministrador())
+            {
+                return RedirigirAlLogin();
+            }
+
+            var trabajo =
+                _context.AsignacionesTecnicos
+                    .Include(a => a.SolicitudServicio)
+                        .ThenInclude(s => s.Cliente)
+                            .ThenInclude(c => c.Usuario)
+                    .Include(a => a.Tecnico)
+                    .FirstOrDefault(a =>
+                        a.IdSolicitud == id &&
+                        a.TipoTrabajo == "Levantamiento" &&
+                        a.Estado == "Finalizado");
 
             if (trabajo == null)
             {
+                TempData["ErrorSolicitud"] =
+                    "El levantamiento no existe o todavía no ha finalizado.";
+
                 return RedirectToAction(nameof(Solicitudes));
             }
 
             ViewBag.Trabajo = trabajo;
 
-            ViewBag.Tarifas = _context.Tarifas
-                .OrderBy(t => t.Descripcion)
-                .ToList();
+            ViewBag.Tarifas =
+                _context.Tarifas
+                    .OrderBy(t => t.Descripcion)
+                    .ToList();
 
             return View();
         }
@@ -827,75 +971,113 @@ namespace InapaWeb.Controllers
             int idSolicitud,
             int idTarifa)
         {
-            if (idTarifa == 0)
+            if (!EsAdministrador())
             {
+                return RedirigirAlLogin();
+            }
+
+            if (idTarifa <= 0)
+            {
+                TempData["ErrorSolicitud"] =
+                    "Debe seleccionar una tarifa.";
+
                 return RedirectToAction(
                     nameof(CategorizarCliente),
                     new { id = idSolicitud }
                 );
             }
 
-            var solicitud = _context.SolicitudesServicio
-                .Include(s => s.Cliente)
-                .FirstOrDefault(s =>
-                    s.IdSolicitud == idSolicitud);
+            var solicitud =
+                _context.SolicitudesServicio
+                    .Include(s => s.Cliente)
+                    .FirstOrDefault(s =>
+                        s.IdSolicitud == idSolicitud);
 
             if (solicitud == null ||
-                solicitud.Estado != "Levantamiento Finalizado")
+                solicitud.Estado !=
+                "Levantamiento Finalizado")
             {
+                TempData["ErrorSolicitud"] =
+                    "La solicitud no está disponible para categorización.";
+
                 return RedirectToAction(nameof(Solicitudes));
             }
 
-            var tarifa = _context.Tarifas
-                .FirstOrDefault(t => t.IdTarifa == idTarifa);
+            var tarifa =
+                _context.Tarifas
+                    .FirstOrDefault(t =>
+                        t.IdTarifa == idTarifa);
 
             if (tarifa == null)
             {
+                TempData["ErrorSolicitud"] =
+                    "La tarifa seleccionada no existe.";
+
                 return RedirectToAction(
                     nameof(CategorizarCliente),
                     new { id = idSolicitud }
                 );
             }
 
-            solicitud.Cliente.IdTarifa = idTarifa;
+            solicitud.Cliente.IdTarifa =
+                tarifa.IdTarifa;
 
-            solicitud.Estado = "Cliente Categorizado";
+            solicitud.Estado =
+                "Cliente Categorizado";
 
             solicitud.ObservacionAdministrador =
                 $"Cliente categorizado con la tarifa: {tarifa.Descripcion}.";
 
             _context.SaveChanges();
 
+            TempData["MensajeSolicitud"] =
+                "Cliente categorizado correctamente.";
+
             return RedirectToAction(nameof(Solicitudes));
         }
 
-        // =========================================================
-        // GENERACIÓN DEL CONTRATO
-        // =========================================================
+
 
         public IActionResult GenerarContrato(int id)
         {
-            var solicitud = _context.SolicitudesServicio
-                .Include(s => s.Cliente)
-                    .ThenInclude(c => c.Usuario)
-                .Include(s => s.Cliente)
-                    .ThenInclude(c => c.Tarifa)
-                .FirstOrDefault(s =>
-                    s.IdSolicitud == id);
+            if (!EsAdministrador())
+            {
+                return RedirigirAlLogin();
+            }
+
+            var solicitud =
+                _context.SolicitudesServicio
+                    .Include(s => s.Cliente)
+                        .ThenInclude(c => c.Usuario)
+                    .Include(s => s.Cliente)
+                        .ThenInclude(c => c.Tarifa)
+                    .FirstOrDefault(s =>
+                        s.IdSolicitud == id);
 
             if (solicitud == null ||
-                solicitud.Estado != "Cliente Categorizado")
+                solicitud.Estado !=
+                "Cliente Categorizado")
             {
+                TempData["ErrorContrato"] =
+                    "La solicitud no está disponible para generar contrato.";
+
                 return RedirectToAction(nameof(Solicitudes));
             }
 
-            bool existeContrato = _context.Contratos.Any(c =>
-                c.IdCliente == solicitud.IdCliente &&
-                (c.Estado == "Activo" ||
-                 c.Estado == "Pendiente"));
+            bool existeContrato =
+                _context.Contratos.Any(c =>
+                    c.IdCliente ==
+                    solicitud.IdCliente &&
+                    (
+                        c.Estado == "Activo" ||
+                        c.Estado == "Pendiente"
+                    ));
 
             if (existeContrato)
             {
+                TempData["ErrorContrato"] =
+                    "El cliente ya posee un contrato activo o pendiente.";
+
                 return RedirectToAction(nameof(Solicitudes));
             }
 
@@ -911,19 +1093,32 @@ namespace InapaWeb.Controllers
             DateTime fechaInicio,
             DateTime fechaFin)
         {
-            var solicitud = _context.SolicitudesServicio
-                .Include(s => s.Cliente)
-                .FirstOrDefault(s =>
-                    s.IdSolicitud == idSolicitud);
+            if (!EsAdministrador())
+            {
+                return RedirigirAlLogin();
+            }
+
+            var solicitud =
+                _context.SolicitudesServicio
+                    .Include(s => s.Cliente)
+                    .FirstOrDefault(s =>
+                        s.IdSolicitud == idSolicitud);
 
             if (solicitud == null ||
-                solicitud.Estado != "Cliente Categorizado")
+                solicitud.Estado !=
+                "Cliente Categorizado")
             {
+                TempData["ErrorContrato"] =
+                    "La solicitud no está disponible para generar contrato.";
+
                 return RedirectToAction(nameof(Solicitudes));
             }
 
             if (solicitud.Cliente.IdTarifa == null)
             {
+                TempData["ErrorContrato"] =
+                    "El cliente debe tener una tarifa asignada.";
+
                 return RedirectToAction(
                     nameof(CategorizarCliente),
                     new { id = idSolicitud }
@@ -947,27 +1142,43 @@ namespace InapaWeb.Controllers
                 );
             }
 
-            bool existeContrato = _context.Contratos.Any(c =>
-                c.IdCliente == solicitud.IdCliente &&
-                (c.Estado == "Activo" ||
-                 c.Estado == "Pendiente"));
+            bool existeContrato =
+                _context.Contratos.Any(c =>
+                    c.IdCliente ==
+                    solicitud.IdCliente &&
+                    (
+                        c.Estado == "Activo" ||
+                        c.Estado == "Pendiente"
+                    ));
 
             if (existeContrato)
             {
+                TempData["ErrorContrato"] =
+                    "El cliente ya posee un contrato activo o pendiente.";
+
                 return RedirectToAction(nameof(Solicitudes));
             }
 
-            var contrato = new Contrato
-            {
-                IdCliente = solicitud.IdCliente,
-                FechaInicio = fechaInicio,
-                FechaFin = fechaFin,
-                Estado = "Pendiente"
-            };
+            var contrato =
+                new Contrato
+                {
+                    IdCliente =
+                        solicitud.IdCliente,
+
+                    FechaInicio =
+                        fechaInicio,
+
+                    FechaFin =
+                        fechaFin,
+
+                    Estado =
+                        "Pendiente"
+                };
 
             _context.Contratos.Add(contrato);
 
-            solicitud.Estado = "Contrato Generado";
+            solicitud.Estado =
+                "Contrato Generado";
 
             solicitud.ObservacionAdministrador =
                 "Contrato generado y pendiente de aprobación.";
@@ -975,39 +1186,52 @@ namespace InapaWeb.Controllers
             var solicitudContrato =
                 _context.SolicitudesContrato
                     .Where(s =>
-                        s.IdCliente == solicitud.IdCliente &&
+                        s.IdCliente ==
+                        solicitud.IdCliente &&
                         s.Estado == "Aprobada")
-                    .OrderByDescending(s => s.FechaSolicitud)
+                    .OrderByDescending(s =>
+                        s.FechaSolicitud)
                     .FirstOrDefault();
 
             if (solicitudContrato != null)
             {
-                solicitudContrato.Estado = "Contrato Generado";
+                solicitudContrato.Estado =
+                    "Contrato Generado";
 
-                solicitudContrato.ObservacionAdministrador =
+                solicitudContrato
+                    .ObservacionAdministrador =
                     "El contrato fue generado y está pendiente de aprobación.";
             }
 
             _context.SaveChanges();
 
+            TempData["MensajeContrato"] =
+                "Contrato generado correctamente.";
+
             return RedirectToAction(nameof(Contratos));
         }
 
-        // =========================================================
-        // CONTRATOS
-        // =========================================================
+
 
         public IActionResult Contratos(string? buscar)
         {
-            var contratos = _context.Contratos
-                .Include(c => c.Cliente)
-                    .ThenInclude(c => c.Usuario)
-                .Include(c => c.Cliente)
-                    .ThenInclude(c => c.Tarifa)
-                .AsQueryable();
+            if (!EsAdministrador())
+            {
+                return RedirigirAlLogin();
+            }
+
+            var contratos =
+                _context.Contratos
+                    .Include(c => c.Cliente)
+                        .ThenInclude(c => c.Usuario)
+                    .Include(c => c.Cliente)
+                        .ThenInclude(c => c.Tarifa)
+                    .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(buscar))
             {
+                buscar = buscar.Trim();
+
                 contratos = contratos.Where(c =>
                     c.Cliente.Usuario.NombreUsuario.Contains(buscar) ||
                     c.Cliente.Usuario.Correo.Contains(buscar) ||
@@ -1024,81 +1248,119 @@ namespace InapaWeb.Controllers
             );
         }
 
+
         public IActionResult AprobarContrato(int id)
         {
-            var contrato = _context.Contratos
-                .Include(c => c.Cliente)
-                .FirstOrDefault(c =>
-                    c.IdContrato == id);
+            if (!EsAdministrador())
+            {
+                return RedirigirAlLogin();
+            }
+
+            var contrato =
+                _context.Contratos
+                    .Include(c => c.Cliente)
+                    .FirstOrDefault(c =>
+                        c.IdContrato == id);
 
             if (contrato == null ||
                 contrato.Estado != "Pendiente")
             {
+                TempData["ErrorContrato"] =
+                    "El contrato no existe o ya fue procesado.";
+
                 return RedirectToAction(nameof(Contratos));
             }
 
             contrato.Estado = "Activo";
 
-            var solicitud = _context.SolicitudesServicio
-                .Where(s =>
-                    s.IdCliente == contrato.IdCliente &&
-                    s.Estado == "Contrato Generado")
-                .OrderByDescending(s => s.FechaSolicitud)
-                .FirstOrDefault();
+            var solicitud =
+                _context.SolicitudesServicio
+                    .Where(s =>
+                        s.IdCliente ==
+                        contrato.IdCliente &&
+                        s.Estado == "Contrato Generado")
+                    .OrderByDescending(s =>
+                        s.FechaSolicitud)
+                    .FirstOrDefault();
 
             if (solicitud != null)
             {
-                solicitud.Estado = "Contrato Aprobado";
+                solicitud.Estado =
+                    "Contrato Aprobado";
 
                 solicitud.ObservacionAdministrador =
-                    "Contrato aprobado. Pendiente de asignación para instalación.";
+                    "Contrato aprobado. Pendiente de coordinación técnica para la instalación.";
             }
 
             var solicitudContrato =
                 _context.SolicitudesContrato
                     .Where(s =>
-                        s.IdCliente == contrato.IdCliente &&
-                        s.Estado == "Contrato Generado")
-                    .OrderByDescending(s => s.FechaSolicitud)
+                        s.IdCliente ==
+                        contrato.IdCliente &&
+                        s.Estado ==
+                        "Contrato Generado")
+                    .OrderByDescending(s =>
+                        s.FechaSolicitud)
                     .FirstOrDefault();
 
             if (solicitudContrato != null)
             {
-                solicitudContrato.Estado = "Finalizada";
+                solicitudContrato.Estado =
+                    "Finalizada";
 
-                solicitudContrato.ObservacionAdministrador =
+                solicitudContrato
+                    .ObservacionAdministrador =
                     "Contrato generado y aprobado correctamente.";
             }
 
             _context.SaveChanges();
 
+            TempData["MensajeContrato"] =
+                "Contrato aprobado correctamente.";
+
             return RedirectToAction(nameof(Contratos));
         }
 
+
+
         public IActionResult RechazarContrato(int id)
         {
-            var contrato = _context.Contratos
-                .FirstOrDefault(c =>
-                    c.IdContrato == id);
+            if (!EsAdministrador())
+            {
+                return RedirigirAlLogin();
+            }
+
+            var contrato =
+                _context.Contratos
+                    .FirstOrDefault(c =>
+                        c.IdContrato == id);
 
             if (contrato == null ||
                 contrato.Estado != "Pendiente")
             {
+                TempData["ErrorContrato"] =
+                    "El contrato no existe o ya fue procesado.";
+
                 return RedirectToAction(nameof(Contratos));
             }
 
             contrato.Estado = "Rechazado";
 
-            var solicitud = _context.SolicitudesServicio
-                .Where(s =>
-                    s.IdCliente == contrato.IdCliente &&
-                    s.Estado == "Contrato Generado")
-                .OrderByDescending(s => s.FechaSolicitud)
-                .FirstOrDefault();
+            var solicitud =
+                _context.SolicitudesServicio
+                    .Where(s =>
+                        s.IdCliente ==
+                        contrato.IdCliente &&
+                        s.Estado ==
+                        "Contrato Generado")
+                    .OrderByDescending(s =>
+                        s.FechaSolicitud)
+                    .FirstOrDefault();
 
             if (solicitud != null)
             {
-                solicitud.Estado = "Contrato Rechazado";
+                solicitud.Estado =
+                    "Contrato Rechazado";
 
                 solicitud.ObservacionAdministrador =
                     "El contrato fue rechazado por el administrador.";
@@ -1107,20 +1369,28 @@ namespace InapaWeb.Controllers
             var solicitudContrato =
                 _context.SolicitudesContrato
                     .Where(s =>
-                        s.IdCliente == contrato.IdCliente &&
-                        s.Estado == "Contrato Generado")
-                    .OrderByDescending(s => s.FechaSolicitud)
+                        s.IdCliente ==
+                        contrato.IdCliente &&
+                        s.Estado ==
+                        "Contrato Generado")
+                    .OrderByDescending(s =>
+                        s.FechaSolicitud)
                     .FirstOrDefault();
 
             if (solicitudContrato != null)
             {
-                solicitudContrato.Estado = "Contrato Rechazado";
+                solicitudContrato.Estado =
+                    "Contrato Rechazado";
 
-                solicitudContrato.ObservacionAdministrador =
+                solicitudContrato
+                    .ObservacionAdministrador =
                     "El contrato generado fue rechazado.";
             }
 
             _context.SaveChanges();
+
+            TempData["MensajeContrato"] =
+                "Contrato rechazado correctamente.";
 
             return RedirectToAction(nameof(Contratos));
         }
