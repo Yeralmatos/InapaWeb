@@ -1,0 +1,47 @@
+﻿@{
+    ViewData["Title"] = "Cierre de Reclamación";
+}
+
+<h1>Cierre de Reclamaciones</h1>
+
+<form>
+
+    <div>
+        <label>ID de reclamación:</label>
+        <input type="number" class="form-control" />
+    </div>
+
+    <br />
+
+    <div>
+        <label>Resultado de la atención:</label>
+        <textarea class="form-control"></textarea>
+    </div>
+
+    <br />
+
+    <div>
+        <label>Estado final:</label>
+
+        <select class="form-control">
+            <option>Resuelta</option>
+            <option>Rechazada</option>
+            <option>Cerrada</option>
+        </select>
+
+    </div>
+
+    <br />
+
+    <div>
+        <label>Fecha de cierre:</label>
+        <input type="date" class="form-control" />
+    </div>
+
+    <br />
+
+    <button type="submit" class="btn btn-success">
+        Cerrar Reclamación
+    </button>
+
+</form>

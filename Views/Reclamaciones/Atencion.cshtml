@@ -1,0 +1,47 @@
+﻿@{
+    ViewData["Title"] = "Atención de Reclamaciones";
+}
+
+<h1>Atención de Reclamaciones</h1>
+
+<form>
+
+    <div>
+        <label>ID de reclamación:</label>
+        <input type="number" class="form-control" />
+    </div>
+
+    <br />
+
+    <div>
+        <label>Responsable asignado:</label>
+        <input type="text" class="form-control" />
+    </div>
+
+    <br />
+
+    <div>
+        <label>Observaciones de atención:</label>
+        <textarea class="form-control"></textarea>
+    </div>
+
+    <br />
+
+    <div>
+        <label>Estado:</label>
+
+        <select class="form-control">
+            <option>Pendiente</option>
+            <option>En proceso</option>
+            <option>Atendida</option>
+        </select>
+
+    </div>
+
+    <br />
+
+    <button type="submit" class="btn btn-primary">
+        Guardar Atención
+    </button>
+
+</form>
