@@ -1,0 +1,358 @@
+﻿@{
+    ViewData["Title"] = "Reclamaciones";
+}
+
+
+<style>
+
+    .card-modulo {
+        border-radius: 15px;
+        transition: 0.3s;
+    }
+
+
+        .card-modulo:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+
+    .icono-modulo {
+        font-size: 45px;
+        color: #0752b3;
+    }
+
+
+    .titulo-modulo {
+        color: #0752b3;
+        font-weight: bold;
+    }
+
+</style>
+
+
+
+<div class="container mt-4">
+
+
+    <div class="card shadow-sm">
+
+
+        <div class="card-header text-white"
+             style="background:#0752b3">
+
+            <h3 class="mb-0">
+                📋 Módulo de Reclamaciones
+            </h3>
+
+        </div>
+
+
+
+        <div class="card-body">
+
+
+            <h5>
+                Bienvenido,
+                @ViewBag.NombreUsuario
+            </h5>
+
+
+            <p class="text-muted">
+                Gestione las reclamaciones individuales y colectivas.
+            </p>
+
+            <!-- ============================= -->
+            <!-- MÓDULOS DE GESTIÓN -->
+            <!-- ============================= -->
+
+            <hr class="mt-4" />
+
+            <h4 class="mb-3">
+                Módulos de Gestión
+            </h4>
+
+
+            <div class="row">
+
+                <!-- Individual -->
+                <div class="col-md-3 mb-3">
+
+                    <div class="card card-modulo h-100 shadow-sm text-center">
+
+                        <div class="card-body">
+
+                            <i class="bi bi-person-fill"
+                               style="font-size:45px;color:#0752b3">
+                            </i>
+
+                            <h5 class="mt-3">
+                                Individual
+                            </h5>
+
+                            <p>
+                                Reclamos realizados por un cliente.
+                            </p>
+
+                            <a asp-controller="Admin"
+                               asp-action="Individual"
+                               class="btn btn-outline-primary">
+                                Entrar
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Colectiva -->
+                <div class="col-md-3 mb-3">
+
+                    <div class="card h-100 shadow-sm text-center">
+
+                        <div class="card-body">
+
+                            <i class="bi bi-people-fill"
+                               style="font-size:45px;color:#0752b3">
+                            </i>
+
+                            <h5 class="mt-3">
+                                Colectiva
+                            </h5>
+
+                            <p>
+                                Reclamos de varios usuarios.
+                            </p>
+
+                            <a href="#"
+                               class="btn btn-primary">
+                                Entrar
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Virtual -->
+                <div class="col-md-3 mb-3">
+
+                    <div class="card h-100 shadow-sm text-center">
+
+                        <div class="card-body">
+
+                            <i class="bi bi-globe"
+                               style="font-size:45px;color:#0752b3">
+                            </i>
+
+                            <h5 class="mt-3">
+                                Virtual
+                            </h5>
+
+                            <p>
+                                Reclamos realizados en línea.
+                            </p>
+
+                            <a href="#"
+                               class="btn btn-primary">
+                                Entrar
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Vivienda -->
+                <div class="col-md-3 mb-3">
+
+                    <div class="card h-100 shadow-sm text-center">
+
+                        <div class="card-body">
+
+                            <i class="bi bi-house-fill"
+                               style="font-size:45px;color:#0752b3">
+                            </i>
+
+                            <h5 class="mt-3">
+                                Vivienda
+                            </h5>
+
+                            <p>
+                                Reclamos relacionados al hogar.
+                            </p>
+
+                            <a href="#"
+                               class="btn btn-primary">
+                                Entrar
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+            <!-- ============================= -->
+            <!-- SEGUNDA FILA DE MÓDULOS -->
+            <!-- ============================= -->
+
+
+            <div class="row">
+
+
+                <!-- Barrio -->
+                <div class="col-md-3 mb-3">
+
+                    <div class="card h-100 shadow-sm text-center">
+
+                        <div class="card-body">
+
+                            <i class="bi bi-geo-alt-fill"
+                               style="font-size:45px;color:#0752b3">
+                            </i>
+
+                            <h5 class="mt-3">
+                                Barrio / Comunidad
+                            </h5>
+
+                            <p>
+                                Reclamos colectivos de sectores.
+                            </p>
+
+                            <a href="#"
+                               class="btn btn-primary">
+                                Entrar
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Seguimiento -->
+                <div class="col-md-3 mb-3">
+
+                    <div class="card h-100 shadow-sm text-center">
+
+                        <div class="card-body">
+
+                            <i class="bi bi-search"
+                               style="font-size:45px;color:#0752b3">
+                            </i>
+
+                            <h5 class="mt-3">
+                                Seguimiento
+                            </h5>
+
+                            <p>
+                                Consultar avance del reclamo.
+                            </p>
+
+                            <a href="#"
+                               class="btn btn-primary">
+                                Entrar
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Evidencias -->
+                <div class="col-md-3 mb-3">
+
+                    <div class="card h-100 shadow-sm text-center">
+
+                        <div class="card-body">
+
+                            <i class="bi bi-folder-fill"
+                               style="font-size:45px;color:#0752b3">
+                            </i>
+
+                            <h5 class="mt-3">
+                                Evidencias
+                            </h5>
+
+                            <p>
+                                Fotos, documentos y archivos.
+                            </p>
+
+                            <a href="#"
+                               class="btn btn-primary">
+                                Entrar
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Atención y Cierre -->
+                <div class="col-md-3 mb-3">
+
+                    <div class="card h-100 shadow-sm text-center">
+
+                        <div class="card-body">
+
+                            <i class="bi bi-check-circle-fill"
+                               style="font-size:45px;color:#0752b3">
+                            </i>
+
+                            <h5 class="mt-3">
+                                Atención y Cierre
+                            </h5>
+
+                            <p>
+                                Resolución y cierre del reclamo.
+                            </p>
+
+                            <a href="#"
+                               class="btn btn-primary">
+                                Entrar
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+            <!-- ============================= -->
+            <!-- BOTÓN REGRESAR -->
+            <!-- ============================= -->
+
+            <div class="text-center mt-4 mb-3">
+
+                <a asp-controller="Admin"
+                   asp-action="Index"
+                   class="btn btn-outline-primary">
+
+                    <i class="bi bi-arrow-left"></i>
+                    Volver al Menú Principal
+
+                </a>
+
+            </div>

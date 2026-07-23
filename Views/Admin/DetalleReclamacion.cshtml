@@ -1,0 +1,82 @@
+﻿@model InapaWeb.Models.Reclamacion
+
+@{
+    ViewData["Title"] = "Detalle de Reclamación";
+}
+
+
+<div class="container mt-4">
+
+    <div class="card shadow-sm">
+
+        <div class="card-header text-white"
+             style="background:#0752b3">
+
+            <h3 class="mb-0">
+                📄 Detalle de Reclamación
+            </h3>
+
+        </div>
+
+
+        <div class="card-body">
+
+
+            <h5>
+                Cliente
+            </h5>
+
+            <p>
+                @Model.Cliente.Usuario.NombreUsuario
+            </p>
+
+
+            <hr />
+
+
+            <h5>
+                Descripción
+            </h5>
+
+            <p>
+                @Model.Descripcion
+            </p>
+
+
+            <hr />
+
+
+            <h5>
+                <h5>
+                    Estado actual
+                </h5>
+
+                <span class="badge bg-warning">
+                    @Model.Estado
+                </span>
+
+
+                <hr />
+
+
+                <div class="text-center mt-4">
+
+                    <a asp-action="Individual"
+                       class="btn btn-outline-secondary">
+
+                        ← Volver
+
+                    </a>
+
+                </div>
+
+                </a>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>

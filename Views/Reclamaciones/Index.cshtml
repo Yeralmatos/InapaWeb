@@ -1,401 +1,98 @@
-﻿@using Microsoft.AspNetCore.Http
-
-@{
-    ViewData["Title"] = "Reclamaciones";
-
-    var rol = Context.Session.GetString("RolUsuario");
-}
-
-<div class="container mt-4">
-
-    <div class="card shadow border-0">
-
-        <div class="card-header text-white"
-             style="background:#063c82">
-
-            <h2 class="mb-0">
-                <i class="bi bi-chat-square-text-fill"></i>
-                Módulo de Reclamaciones
-            </h2>
-
+﻿<div class="container my-4">
+    <!-- Encabezado Principal -->
+    <div class="card mb-4 shadow-sm border-0">
+        <div class="card-header bg-primary text-white py-3">
+            <h3 class="mb-0 fs-4 fw-bold">Módulo de Reclamaciones</h3>
         </div>
-
-
         <div class="card-body">
-
-            <p class="text-muted">
-                Gestione sus reclamaciones individuales y colectivas,
-                consulte estados y realice seguimiento de sus casos.
-            </p>
-
-
-            <div class="row mt-4">
-
-
-    @if (rol == "Cliente" ||
-     rol == "Recepcionista" ||
-     rol == "Supervisor" ||
-     rol == "Administrador")
-{
-    <!-- Individual -->
-    <div class="col-md-4 mb-3">
-
-        <div class="card h-100 shadow-sm">
-
-            <div class="card-body text-center">
-
-                <i class="bi bi-person-fill"
-                   style="font-size:45px;color:#0752b3"></i>
-
-                <h5 class="mt-3">
-                    Reclamación Individual
-                </h5>
-
-                <p>
-                    Reclamos realizados por un ciudadano.
-                </p>
-
-                <div class="d-grid gap-2">
-
-                    <a asp-action="Individual"
-                       class="btn btn-primary">
-                        <i class="bi bi-plus-circle"></i>
-                        Registrar
-                    </a>
-
-                    <a asp-controller="Cliente"
-                       asp-action="Index"
-                       class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left-circle"></i>
-                        Volver a Módulos
-                    </a>
-
-                </div>
-
-            </div>
-
+            <p class="text-muted mb-0">Gestione sus reclamaciones individuales y colectivas, consulte estados y realice seguimiento de sus casos.</p>
         </div>
-
-    </div>
-}
-
     </div>
 
-</div>
-                            </a>
+    <!-- Grid de Opciones / Tarjetas -->
+    <div class="row g-4">
 
-                        </div>
+        <!-- Reclamación Individual -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border">
+                <div class="card-body text-center d-flex flex-column">
+                    <h5 class="card-title fw-bold">Reclamación Individual</h5>
+                    <p class="card-text text-muted flex-grow-1">Reclamos realizados por un ciudadano.</p>
+                    <div class="d-grid gap-2 mt-3">
+                        <a href="#" class="btn btn-primary">Registrar</a>
+                        <a href="#" class="btn btn-outline-secondary">Volver a Módulos</a>
                     </div>
                 </div>
-
-
-                @if (rol == "Cliente" ||
-     rol == "Recepcionista" ||
-     rol == "Supervisor" ||
-     rol == "Administrador")
-{
-    <!-- Colectiva -->
-    <div class="col-md-4 mb-3">
-
-        <div class="card h-100 shadow-sm">
-
-            <div class="card-body text-center">
-
-                <i class="bi bi-people-fill"
-                   style="font-size:45px;color:#16824b"></i>
-
-                <h5 class="mt-3">
-                    Reclamación Colectiva
-                </h5>
-
-                <p>
-                    Reportar problemas que afectan un barrio o sector.
-                </p>
-
-                <div class="d-grid gap-2">
-
-                    <a asp-action="Colectiva"
-                       class="btn btn-success">
-                        <i class="bi bi-plus-circle"></i>
-                        Registrar
-                    </a>
-
-                    <a asp-controller="Cliente"
-                       asp-action="Index"
-                       class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left-circle"></i>
-                        Volver a Módulos
-                    </a>
-
-                </div>
-
             </div>
-
         </div>
 
-    </div>
-}
-
-@if (rol == "Cliente" ||
-rol == "Supervisor" ||
-rol == "Administrador")
-{
-    <!-- Reclamación Virtual -->
-    <div class="col-md-4 mb-3">
-
-        <div class="card h-100 shadow-sm">
-
-            <div class="card-body text-center">
-
-                <i class="bi bi-laptop"
-                   style="font-size:45px;color:#0d6efd"></i>
-
-                <h5 class="mt-3">
-                    Reclamación Virtual
-                </h5>
-
-                <p>
-                    Registrar una reclamación desde la plataforma web.
-                </p>
-
-                <div class="d-grid gap-2">
-
-                    <a asp-action="RegistrarVirtual"
-                       class="btn btn-primary">
-                        <i class="bi bi-plus-circle"></i>
-                        Registrar
-                    </a>
-
-                    <a asp-controller="Cliente"
-                       asp-action="Index"
-                       class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left-circle"></i>
-                        Volver a Módulos
-                    </a>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-}
-
-
-@if (rol == "Recepcionista" ||
-rol == "Supervisor" ||
-rol == "Administrador")
-{
-    <!-- Reclamación Presencial -->
-    <div class="col-md-4 mb-3">
-
-        <div class="card h-100 shadow-sm">
-
-            <div class="card-body text-center">
-
-                <i class="bi bi-building"
-                   style="font-size:45px;color:#dc3545"></i>
-
-                <h5 class="mt-3">
-                    Reclamación Presencial
-                </h5>
-
-                <p>
-                    Registrar una reclamación realizada en la oficina.
-                </p>
-
-                <div class="d-grid gap-2">
-
-                    <a asp-action="RegistrarPresencial"
-                       class="btn btn-danger">
-                        <i class="bi bi-plus-circle"></i>
-                        Registrar
-                    </a>
-
-                    <a asp-controller="Cliente"
-                       asp-action="Index"
-                       class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left-circle"></i>
-                        Volver a Módulos
-                    </a>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-}
-@if (rol == "Cliente" ||
-     rol == "Recepcionista" ||
-     rol == "Técnico" ||
-     rol == "Supervisor" ||
-     rol == "Administrador")
-{
-    <!-- Vivienda -->
-    <div class="col-md-4 mb-3">
-
-        <div class="card h-100 shadow-sm">
-
-            <div class="card-body text-center">
-
-                <i class="bi bi-house-fill"
-                   style="font-size:45px;color:#0d6efd"></i>
-
-                <h5 class="mt-3">
-                    Reclamación para Vivienda
-                </h5>
-
-                <p>
-                    Registrar una reclamación relacionada con una vivienda.
-                </p>
-
-                <div class="d-grid gap-2">
-
-                    <a asp-action="ReclamacionVivienda"
-                       class="btn btn-primary">
-                        <i class="bi bi-plus-circle"></i>
-                        Registrar
-                    </a>
-
-                    <a asp-controller="Cliente"
-                       asp-action="Index"
-                       class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left-circle"></i>
-                        Volver a Módulos
-                    </a>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-}
-
-                <!-- Sector -->
-                <div class="col-md-4 mb-3">
-                    <div class="card h-100 shadow-sm">
-
-                        <div class="card-body text-center">
-
-                            <i class="bi bi-geo-alt-fill"
-                               style="font-size:45px;color:#6f42c1">
-                            </i>
-
-                            <h5 class="mt-3">
-                                Barrio o Sector
-                            </h5>
-
-                            <p>
-                                Reportes comunitarios.
-                            </p>
-
-                            <a asp-action="ReclamacionSector"
-                               class="btn btn-secondary">
-                                Ver
-                            </a>
-
-                        </div>
-
+        <!-- Reclamación Colectiva -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border">
+                <div class="card-body text-center d-flex flex-column">
+                    <h5 class="card-title fw-bold">Reclamación Colectiva</h5>
+                    <p class="card-text text-muted flex-grow-1">Reportar problemas que afectan un barrio o sector.</p>
+                    <div class="d-grid gap-2 mt-3">
+                        <a href="#" class="btn btn-success">Registrar</a>
+                        <a href="#" class="btn btn-outline-secondary">Volver a Módulos</a>
                     </div>
                 </div>
-
-
-                <!-- Seguimiento -->
-                <div class="col-md-4 mb-3">
-                    <div class="card h-100 shadow-sm">
-
-                        <div class="card-body text-center">
-
-                            <i class="bi bi-search"
-                               style="font-size:45px;color:#198754">
-                            </i>
-
-                            <h5 class="mt-3">
-                                Seguimiento
-                            </h5>
-
-                            <p>
-                                Consulte el estado de su reclamación.
-                            </p>
-
-                            <a asp-action="Seguimiento"
-                               class="btn btn-dark">
-                                Consultar
-                            </a>
-
-                        </div>
-
-                    </div>
-                </div>
-
-
-                <!-- Evidencias -->
-                <div class="col-md-4 mb-3">
-                    <div class="card h-100 shadow-sm">
-
-                        <div class="card-body text-center">
-
-                            <i class="bi bi-images"
-                               style="font-size:45px;color:#6610f2">
-                            </i>
-
-                            <h5 class="mt-3">
-                                Detalle y Evidencias
-                            </h5>
-
-                            <p>
-                                Consulte documentos y pruebas.
-                            </p>
-
-                            <a asp-action="Detalle"
-                               class="btn btn-primary">
-                                Ver
-                            </a>
-
-                        </div>
-
-                    </div>
-                </div>
-
-
-                <!-- Cierre -->
-                <div class="col-md-4 mb-3">
-                    <div class="card h-100 shadow-sm">
-
-                        <div class="card-body text-center">
-
-                            <i class="bi bi-check-circle-fill"
-                               style="font-size:45px;color:#20c997">
-                            </i>
-
-                            <h5 class="mt-3">
-                                Atención y Cierre
-                            </h5>
-
-                            <p>
-                                Gestión final de reclamaciones.
-                            </p>
-
-                            <a asp-action="Atencion"
-                               class="btn btn-success">
-                                Gestionar
-                            </a>
-
-                        </div>
-
-                    </div>
-                </div>
-
-
             </div>
+        </div>
 
+        <!-- Reclamación Virtual -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border">
+                <div class="card-body text-center d-flex flex-column">
+                    <h5 class="card-title fw-bold">Reclamación Virtual</h5>
+                    <p class="card-text text-muted flex-grow-1">Registrar una reclamación desde la plataforma web.</p>
+                    <div class="d-grid gap-2 mt-3">
+                        <a href="#" class="btn btn-primary">Registrar</a>
+                        <a href="#" class="btn btn-outline-secondary">Volver a Módulos</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reclamación para Vivienda -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border">
+                <div class="card-body text-center d-flex flex-column">
+                    <h5 class="card-title fw-bold">Reclamación para Vivienda</h5>
+                    <p class="card-text text-muted flex-grow-1">Registrar una reclamación relacionada con una vivienda.</p>
+                    <div class="d-grid gap-2 mt-3">
+                        <a href="#" class="btn btn-primary">Registrar</a>
+                        <a href="#" class="btn btn-outline-secondary">Volver a Módulos</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Barrio o Sector -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border">
+                <div class="card-body text-center d-flex flex-column">
+                    <h5 class="card-title fw-bold">Barrio o Sector</h5>
+                    <p class="card-text text-muted flex-grow-1">Reportes comunitarios.</p>
+                    <div class="mt-3">
+                        <a href="#" class="btn btn-secondary px-4">Ver</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seguimiento -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border">
+                <div class="card-body text-center d-flex flex-column">
+                    <h5 class="card-title fw-bold">Seguimiento</h5>
+                    <p class="card-text text-muted flex-grow-1">Consulte el estado de su reclamación.</p>
+                    <div class="mt-3">
+                        <a href="#" class="btn btn-dark px-4">Consultar</a>
+                    </div>
+                </div>
+            </div>
         </div>
 
     </div>
-
 </div>

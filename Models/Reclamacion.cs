@@ -8,14 +8,18 @@ namespace InapaWeb.Models
         [Key]
         public int IdReclamacion { get; set; }
 
+
         [Required]
         public int IdCliente { get; set; }
 
+
         [ForeignKey("IdCliente")]
-        public Cliente Cliente { get; set; }
+        public Cliente Cliente { get; set; } = null!;
+
 
         [Required]
-        public string Descripcion { get; set; }
+        public string Descripcion { get; set; } = null!;
+
 
         [Required]
         [StringLength(20)]

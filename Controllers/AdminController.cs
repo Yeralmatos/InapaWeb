@@ -1346,6 +1346,7 @@ namespace InapaWeb.Controllers
 
             contrato.Estado = "Rechazado";
 
+
             var solicitud =
                 _context.SolicitudesServicio
                     .Where(s =>
@@ -1357,6 +1358,7 @@ namespace InapaWeb.Controllers
                         s.FechaSolicitud)
                     .FirstOrDefault();
 
+
             if (solicitud != null)
             {
                 solicitud.Estado =
@@ -1365,6 +1367,8 @@ namespace InapaWeb.Controllers
                 solicitud.ObservacionAdministrador =
                     "El contrato fue rechazado por el administrador.";
             }
+
+
 
             var solicitudContrato =
                 _context.SolicitudesContrato
@@ -1377,22 +1381,139 @@ namespace InapaWeb.Controllers
                         s.FechaSolicitud)
                     .FirstOrDefault();
 
+
             if (solicitudContrato != null)
             {
                 solicitudContrato.Estado =
                     "Contrato Rechazado";
 
-                solicitudContrato
-                    .ObservacionAdministrador =
+                solicitudContrato.ObservacionAdministrador =
                     "El contrato generado fue rechazado.";
             }
 
+
             _context.SaveChanges();
+
 
             TempData["MensajeContrato"] =
                 "Contrato rechazado correctamente.";
 
+
             return RedirectToAction(nameof(Contratos));
+        }
+
+
+
+        // ==========================================
+        // MÓDULO DE RECLAMACIONES
+        // ==========================================
+
+        public IActionResult Reclamaciones()
+        {
+            if (!EsAdministrador())
+            {
+                return RedirigirAlLogin();
+            }
+
+
+            ViewBag.NombreUsuario =
+                HttpContext.Session.GetString("NombreUsuario")
+                ?? "Administrador";
+
+
+            ViewBag.TotalReclamaciones =
+                _context.Reclamaciones.Count();
+
+
+            ViewBag.ReclamacionesPendientes =
+                _context.Reclamaciones
+                    .Count(r => r.Estado == "Pendiente");
+
+
+            ViewBag.ReclamacionesProceso =
+                _context.Reclamaciones
+                    .Count(r => r.Estado == "En Proceso");
+
+
+            ViewBag.ReclamacionesFinalizadas =
+                _context.Reclamaciones
+                    .Count(r => r.Estado == "Finalizada");
+
+
+            return View();
+        }
+
+
+        // ==========================================
+        // RECLAMACIONES INDIVIDUALES
+        // ==========================================
+
+        public IActionResult Individual(string? buscar)
+        {
+            if (!EsAdministrador())
+            {
+                return RedirigirAlLogin();
+            }
+
+
+            var reclamaciones = _context.Reclamaciones
+                .Include(r => r.Cliente)
+                    .ThenInclude(c => c.Usuario)
+                .AsQueryable();
+
+
+            if (!string.IsNullOrWhiteSpace(buscar))
+            {
+                buscar = buscar.Trim();
+
+                reclamaciones = reclamaciones.Where(r =>
+                    r.Cliente.Usuario.NombreUsuario.Contains(buscar) ||
+                    r.Descripcion.Contains(buscar) ||
+                    r.Estado.Contains(buscar));
+            }
+
+
+            ViewBag.Buscar = buscar;
+
+
+            return View(
+                reclamaciones
+                    .OrderByDescending(r => r.IdReclamacion)
+                    .ToList()
+            );
+        }
+
+
+
+        // ==========================================
+        // DETALLE DE RECLAMACIÓN
+        // ==========================================
+
+        public IActionResult DetalleReclamacion(int id)
+        {
+            if (!EsAdministrador())
+            {
+                return RedirigirAlLogin();
+            }
+
+
+            var reclamacion = _context.Reclamaciones
+                .Include(r => r.Cliente)
+                    .ThenInclude(c => c.Usuario)
+                .FirstOrDefault(r =>
+                    r.IdReclamacion == id);
+
+
+            if (reclamacion == null)
+            {
+                TempData["ErrorReclamacion"] =
+                    "La reclamación no existe.";
+
+                return RedirectToAction(nameof(Individual));
+            }
+
+
+            return View(reclamacion);
         }
     }
 }
