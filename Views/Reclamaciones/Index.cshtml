@@ -19,27 +19,51 @@
                     <h5 class="card-title fw-bold">Reclamación Individual</h5>
                     <p class="card-text text-muted flex-grow-1">Reclamos realizados por un ciudadano.</p>
                     <div class="d-grid gap-2 mt-3">
-                        <a href="#" class="btn btn-primary">Registrar</a>
-                        <a href="#" class="btn btn-outline-secondary">Volver a Módulos</a>
+                        <a asp-controller="Reclamaciones"
+   asp-action="Individual"
+   class="btn btn-primary">
+    Registrar
+</a>
+                        <a asp-controller="Home"
+   asp-action="Index"
+   class="btn btn-outline-secondary">
+    Volver a Módulos
+</a>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Reclamación Colectiva -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100 shadow-sm border">
-                <div class="card-body text-center d-flex flex-column">
-                    <h5 class="card-title fw-bold">Reclamación Colectiva</h5>
-                    <p class="card-text text-muted flex-grow-1">Reportar problemas que afectan un barrio o sector.</p>
-                    <div class="d-grid gap-2 mt-3">
-                        <a href="#" class="btn btn-success">Registrar</a>
-                        <a href="#" class="btn btn-outline-secondary">Volver a Módulos</a>
-                    </div>
-                </div>
+    <!-- Reclamación Colectiva -->
+<div class="col-md-6 col-lg-4">
+    <div class="card h-100 shadow-sm border">
+        <div class="card-body text-center d-flex flex-column">
+            <h5 class="card-title fw-bold">
+                Reclamación Colectiva
+            </h5>
+
+            <p class="card-text text-muted flex-grow-1">
+                Reportar problemas que afectan un barrio o sector.
+            </p>
+
+            <div class="d-grid gap-2 mt-3">
+
+                <a asp-controller="Reclamaciones"
+                   asp-action="Colectiva"
+                   class="btn btn-success">
+                    Registrar
+                </a>
+
+                <a asp-controller="Cliente"
+                   asp-action="Index"
+                   class="btn btn-outline-secondary">
+                    Volver a Módulos
+                </a>
+
             </div>
         </div>
-
+    </div>
+</div>
         <!-- Reclamación Virtual -->
         <div class="col-md-6 col-lg-4">
             <div class="card h-100 shadow-sm border">
@@ -93,6 +117,8 @@
                 </div>
             </div>
         </div>
+
+
 
     </div>
 </div>

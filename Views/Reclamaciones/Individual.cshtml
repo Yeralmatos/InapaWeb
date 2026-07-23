@@ -4,46 +4,76 @@
     ViewData["Title"] = "Reclamación Individual";
 }
 
-<div class="container mt-4">
+<h2 class="mb-4">Registrar Reclamación Individual</h2>
 
-    <h2>Reclamación Individual</h2>
-    <hr />
 
-    @if (TempData["Mensaje"] != null)
-    {
-        <div class="alert alert-success">
-            @TempData["Mensaje"]
-        </div>
-    }
+<form asp-action="Registrar" method="post">
 
-    <form asp-action="Individual" method="post">
+    @Html.AntiForgeryToken()
 
-        <div class="mb-3">
-            <label asp-for="Descripcion" class="form-label">
-                Descripción de la reclamación
-            </label>
+    <input type="hidden" asp-for="IdCliente" />
 
-            <textarea asp-for="Descripcion"
-                      class="form-control"
-                      rows="6"
-                      placeholder="Describa su reclamación..."></textarea>
 
-            <span asp-validation-for="Descripcion"
-                  class="text-danger"></span>
-        </div>
+    <div class="mb-3">
+        <label class="form-label">
+            Cliente
+        </label>
 
-        <button type="submit" class="btn btn-primary">
-            Registrar Reclamación
-        </button>
+        <input class="form-control"
+               value="@ViewBag.NombreCliente"
+               readonly />
+    </div>
 
-        <a asp-action="Index"
-           class="btn btn-secondary">
-            Cancelar
-        </a>
 
-    </form>
 
-</div>
+    <div class="mb-3">
+        <label class="form-label">
+            Tipo de reclamación
+        </label>
+
+        <input asp-for="TipoReclamacion"
+               class="form-control"
+               readonly />
+
+    </div>
+
+
+
+    <div class="mb-3">
+        <label class="form-label">
+            Descripción de la reclamación
+        </label>
+
+
+        <textarea asp-for="Descripcion"
+                  class="form-control"
+                  rows="5"
+                  placeholder="Describa el problema..."></textarea>
+
+
+        <span asp-validation-for="Descripcion"
+              class="text-danger">
+        </span>
+
+    </div>
+
+
+
+    <button type="submit"
+            class="btn btn-primary">
+        Enviar reclamación
+    </button>
+
+
+
+    <a asp-action="Index"
+       class="btn btn-secondary">
+        Cancelar
+    </a>
+
+
+</form>
+
 
 @section Scripts {
     @{

@@ -21,17 +21,13 @@ namespace InapaWeb.Migrations
                 oldType: "nvarchar(30)",
                 oldMaxLength: 30);
 
-            migrationBuilder.AlterColumn<string>(
-                name: "DireccionAveria",
-                table: "Averias",
-                type: "nvarchar(500)",
-                maxLength: 500,
-                nullable: false,
-                defaultValue: "",
-                oldClrType: typeof(string),
-                oldType: "nvarchar(500)",
-                oldMaxLength: 500,
-                oldNullable: true);
+            migrationBuilder.AddColumn<string>(
+     name: "DireccionAveria",
+     table: "Averias",
+     type: "nvarchar(500)",
+     maxLength: 500,
+     nullable: false,
+     defaultValue: "");
 
             migrationBuilder.AddColumn<string>(
                 name: "Categoria",

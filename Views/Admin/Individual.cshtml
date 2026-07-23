@@ -34,10 +34,9 @@
                 Ver reclamaciones enviadas por los clientes.
             </p>
 
-
-            <<a asp-controller="Admin"
-                asp-action="Individual"
-                class="btn btn-primary">
+            <a asp-controller="Admin"
+               asp-action="Individual"
+               class="btn btn-primary">
 
                 Ver reclamaciones
 
@@ -105,7 +104,51 @@
 </tr>
 
 </thead>
+                    <tbody>
 
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+
+                                    <td>@item.IdReclamacion</td>
+
+                                    <td>@item.Cliente.Usuario.NombreUsuario</td>
+
+                                    <td>@item.Estado</td>
+
+                                    <td>@item.Descripcion</td>
+
+                                    <td>
+
+                                        <a asp-action="DetalleReclamacion"
+                                           asp-route-id="@item.IdReclamacion"
+                                           class="btn btn-info btn-sm">
+
+                                            Ver
+
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+
+                                <td colspan="5" class="text-center">
+
+                                    No hay reclamaciones registradas.
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
 
         </table>
 
