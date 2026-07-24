@@ -14,11 +14,13 @@ namespace InapaWeb.Models
 
 
         [ForeignKey("IdCliente")]
-        public Cliente Cliente { get; set; } = null!;
+        public Cliente? Cliente { get; set; }
+
 
 
         [Required]
         public string Descripcion { get; set; } = null!;
+
 
 
         [Required]
@@ -26,9 +28,11 @@ namespace InapaWeb.Models
         public string Estado { get; set; } = "Pendiente";
 
 
+
         [Required]
         [StringLength(50)]
         public string TipoReclamacion { get; set; } = "Individual";
+
 
 
         // Técnico asignado
@@ -39,20 +43,25 @@ namespace InapaWeb.Models
         public Usuario? Tecnico { get; set; }
 
 
+
         // Diagnóstico realizado por técnico
         public string? DiagnosticoTecnico { get; set; }
+
 
 
         // Solución aplicada
         public string? SolucionAplicada { get; set; }
 
 
+
         // Evidencias (rutas de archivos o imágenes)
         public string? Evidencias { get; set; }
 
 
+
         // Observación del supervisor
         public string? ObservacionSupervisor { get; set; }
+
 
 
         // Fechas de control
