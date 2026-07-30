@@ -2,19 +2,22 @@
 
 <div class="container my-4">
 
-    <div class="card shadow">
+    <div class="card shadow border-0">
+
 
         <div class="card-header bg-primary text-white">
+
             <h3 class="mb-0">
                 Registrar Reclamación Individual
             </h3>
+
         </div>
 
 
         <div class="card-body">
 
-            <form asp-controller="Reclamaciones"
-                  asp-action="Registrar"
+
+            <form asp-action="Registrar"
                   method="post"
                   enctype="multipart/form-data">
 
@@ -22,121 +25,293 @@
                 @Html.AntiForgeryToken()
 
 
-                <!-- Mostrar errores -->
-                <div asp-validation-summary="All"
-                     class="text-danger mb-3">
-                </div>
+                <!-- INFORMACIÓN DEL CLIENTE -->
+
+                <div class="card mb-4">
+
+
+                    <div class="card-header bg-light">
+
+                        <h5 class="mb-0">
+                            Información del Cliente
+                        </h5>
+
+                    </div>
+
+
+                    <div class="card-body">
+
+
+                        <div class="row">
+
+
+                            <div class="col-md-6 mb-3">
+
+                                <label class="form-label">
+                                    Nombre del Cliente
+                                </label>
+
+
+                                <input class="form-control"
+                                       value="@ViewBag.NombreCliente"
+                                       readonly />
+
+                            </div>
 
 
 
-                <input type="hidden" asp-for="IdCliente" />
+                            <div class="col-md-6 mb-3">
 
-                <input type="hidden" asp-for="TipoReclamacion" />
-
-                <input type="hidden" asp-for="Estado" />
-
-                <input type="hidden" asp-for="FechaRegistro" />
+                                <label class="form-label">
+                                    Código Cliente
+                                </label>
 
 
+                                <input class="form-control"
+                                       value="@Model.IdCliente"
+                                       readonly />
 
-                <!-- Cliente -->
-                <div class="mb-3">
 
-                    <label class="form-label fw-bold">
-                        Cliente
-                    </label>
+                                <input asp-for="IdCliente"
+                                       type="hidden" />
 
-                    <input class="form-control"
-                           value="@ViewBag.NombreCliente"
-                           readonly />
+                            </div>
 
-                </div>
+
+                        </div>
 
 
 
+                        <div class="mb-3">
 
-                <!-- Tipo -->
-                <div class="mb-3">
-
-                    <label class="form-label fw-bold">
-                        Tipo de reclamación
-                    </label>
-
-                    <input class="form-control"
-                           value="Individual"
-                           readonly />
-
-                </div>
+                            <label class="form-label">
+                                Dirección del Servicio
+                            </label>
 
 
+                            <input asp-for="Direccion"
+                                   class="form-control"
+                                   placeholder="Ingrese la dirección del servicio" />
+
+                            <span asp-validation-for="Direccion"
+                                  class="text-danger">
+                            </span>
+
+                        </div>
 
 
-                <!-- Descripción -->
-                <div class="mb-3">
+                    </div>
 
-                    <label asp-for="Descripcion"
-                           class="form-label fw-bold">
-                        Descripción de la reclamación
-                    </label>
-
-
-                    <textarea asp-for="Descripcion"
-                              class="form-control"
-                              rows="5"
-                              placeholder="Escriba su reclamación aquí..."
-                              required></textarea>
-
-
-                    <span asp-validation-for="Descripcion"
-                          class="text-danger">
-                    </span>
-
-                </div>
-
-
-
-
-                <!-- Evidencia -->
-                <div class="mb-3">
-
-                    <label class="form-label fw-bold">
-                        Evidencia
-                    </label>
-
-
-                    <input type="file"
-                           name="archivoEvidencia"
-                           class="form-control" />
-
-
-                    <small class="text-muted">
-                        Puede adjuntar una imagen como evidencia.
-                    </small>
 
                 </div>
 
 
 
 
-                <!-- Botones -->
-                <div class="mt-4">
+                <!-- INFORMACIÓN DE LA RECLAMACIÓN -->
+
+
+                <div class="card mb-4">
+
+
+                    <div class="card-header bg-light">
+
+                        <h5 class="mb-0">
+                            Información de la Reclamación
+                        </h5>
+
+                    </div>
+
+
+
+                    <div class="card-body">
+
+
+                        <input asp-for="TipoReclamacion"
+                               value="Individual"
+                               type="hidden" />
+
+
+                        <input asp-for="Estado"
+                               value="Pendiente"
+                               type="hidden" />
+
+
+
+                        <div class="mb-3">
+
+
+                            <label class="form-label">
+                                Categoría del Problema
+                            </label>
+
+
+                            <select asp-for="Categoria"
+                                    class="form-select">
+
+
+                                <option value="">
+                                    Seleccione una categoría
+                                </option>
+
+
+                                <option value="Falta de Agua">
+                                    Falta de Agua
+                                </option>
+
+
+                                <option value="Baja Presión">
+                                    Baja Presión
+                                </option>
+
+
+                                <option value="Calidad del Agua">
+                                    Calidad del Agua
+                                </option>
+
+
+                                <option value="Fuga">
+                                    Fuga
+                                </option>
+
+
+                                <option value="Otro">
+                                    Otro
+                                </option>
+
+
+                            </select>
+
+
+                        </div>
+
+
+
+                        <!-- NIVEL DE URGENCIA -->
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Nivel de Urgencia
+                            </label>
+
+
+                            <select asp-for="Prioridad"
+                                    class="form-select">
+
+
+                                <option value="">
+                                    Seleccione el nivel de urgencia
+                                </option>
+
+
+                                <option value="🔴 Alto (Urgencia Crítica)">
+                                    🔴 Alto (Urgencia Crítica)
+                                </option>
+
+
+                                <option value="🟡 Medio (Incidencias Operativas Moderadas)">
+                                    🟡 Medio (Incidencias Operativas Moderadas)
+                                </option>
+
+
+                                <option value="🟢 Bajo (Mantenimiento Rutinario)">
+                                    🟢 Bajo (Mantenimiento Rutinario)
+                                </option>
+
+
+                            </select>
+
+                        </div>
+
+
+
+
+
+                        <div class="mb-3">
+
+
+                            <label class="form-label">
+                                Descripción del Problema
+                            </label>
+
+
+                            <textarea asp-for="Descripcion"
+                                      class="form-control"
+                                      rows="5"
+                                      placeholder="Describa detalladamente la situación"></textarea>
+
+
+                            <span asp-validation-for="Descripcion"
+                                  class="text-danger">
+                            </span>
+
+
+                        </div>
+
+
+
+
+
+                        <!-- EVIDENCIA -->
+
+
+                        <div class="mb-3">
+
+
+                            <label class="form-label">
+                                Adjuntar Evidencia (Foto / Video)
+                            </label>
+
+
+                            <input type="file"
+                                   name="ArchivoEvidencia"
+                                   class="form-control"
+                                   accept="image/*,video/*" />
+
+
+                            <small class="text-muted">
+                                Puede adjuntar fotos o videos como evidencia del problema.
+                            </small>
+
+
+                        </div>
+
+
+
+                    </div>
+
+
+                </div>
+
+
+
+
+                <!-- BOTONES CLIENTE -->
+
+
+                <div class="d-flex justify-content-between">
+
+
+                    <a asp-action="Index"
+                       class="btn btn-outline-secondary">
+
+                        ← Volver a Reclamaciones
+
+                    </a>
+
 
 
                     <button type="submit"
                             class="btn btn-primary">
-                        Enviar reclamación
+
+                        Guardar Reclamación
+
                     </button>
 
 
-
-                    <a asp-controller="Reclamaciones"
-                       asp-action="Index"
-                       class="btn btn-secondary">
-                        Cancelar
-                    </a>
-
-
                 </div>
+
 
 
             </form>
@@ -144,14 +319,8 @@
 
         </div>
 
+
     </div>
 
+
 </div>
-
-
-
-@section Scripts {
-
-    <partial name="_ValidationScriptsPartial" />
-
-}
