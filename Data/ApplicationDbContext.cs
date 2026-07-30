@@ -35,7 +35,6 @@ namespace InapaWeb.Data
 
         public DbSet<Pago> Pagos { get; set; }
 
- 
 
         public DbSet<Averia> Averias { get; set; }
 
@@ -44,7 +43,7 @@ namespace InapaWeb.Data
         public DbSet<RecursoMaterial> RecursosMateriales { get; set; }
 
         public DbSet<SolucionMaterial> SolucionesMateriales { get; set; }
-         
+
 
         public DbSet<Reclamacion> Reclamaciones { get; set; }
 
@@ -53,6 +52,33 @@ namespace InapaWeb.Data
         public DbSet<Notificacion> Notificaciones { get; set; }
 
         public DbSet<HistorialServicio> HistorialServicios { get; set; }
+
+
+
+        // =====================================
+        // CONFIGURACIÓN DE RELACIONES
+        // =====================================
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+
+            // Cliente tiene muchos contratos
+            modelBuilder.Entity<Contrato>()
+                .HasOne(c => c.Cliente)
+                .WithMany()
+                .HasForeignKey(c => c.IdCliente)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+
+            // Tarifa tiene muchos contratos
+            modelBuilder.Entity<Contrato>()
+                .HasOne(c => c.Tarifa)
+                .WithMany()
+                .HasForeignKey(c => c.IdTarifa)
+                .OnDelete(DeleteBehavior.Restrict);
+        }
     }
 }
-
