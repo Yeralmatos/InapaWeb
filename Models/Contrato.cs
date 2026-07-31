@@ -34,14 +34,22 @@ namespace InapaWeb.Models
         [Required]
         [StringLength(50)]
         public string TipoContrato { get; set; } = "Residencial";
-        // Residencial - Comercial - Industrial - Gubernamental
 
 
         [Required]
         [StringLength(30)]
         public string EstadoContrato { get; set; } = "Pendiente";
-        // Pendiente - Aprobado - Activo - Suspendido - Cancelado
 
+        // ==================================================
+        // COMPATIBILIDAD CON CÓDIGO ANTERIOR DEL SISTEMA
+        // ==================================================
+
+        [NotMapped]
+        public string Estado
+        {
+            get { return EstadoContrato; }
+            set { EstadoContrato = value; }
+        }
 
 
         // ============================
@@ -49,7 +57,7 @@ namespace InapaWeb.Models
         // ============================
 
         [Required]
-        public DateTime FechaSolicitud { get; set; }
+        public DateTime FechaSolicitud { get; set; } = DateTime.Now;
 
 
         public DateTime? FechaAprobacion { get; set; }
@@ -67,7 +75,7 @@ namespace InapaWeb.Models
 
 
         // ============================
-        // DATOS DEL TITULAR (COPIA DEL CLIENTE)
+        // DATOS DEL TITULAR
         // ============================
 
         [Required]
@@ -77,7 +85,6 @@ namespace InapaWeb.Models
 
         [StringLength(20)]
         public string DocumentoTitular { get; set; } = string.Empty;
-        // Cédula o RNC
 
 
         [StringLength(20)]
@@ -124,15 +131,22 @@ namespace InapaWeb.Models
         public string NumeroMedidor { get; set; } = string.Empty;
 
 
-        public int? IdTarifa { get; set; }
+
+        // ============================
+        // RELACIÓN TARIFA
+        // ============================
+
+        [Required]
+        public int IdTarifa { get; set; }
+
 
         [ForeignKey("IdTarifa")]
-        public Tarifa? Tarifa { get; set; }
+        public Tarifa Tarifa { get; set; } = null!;
 
 
 
         // ============================
-        // APROBACIÓN Y CONTROL
+        // CONTROL ADMINISTRATIVO
         // ============================
 
         public int? UsuarioAprobacionId { get; set; }
@@ -150,7 +164,7 @@ namespace InapaWeb.Models
 
 
         // ============================
-        // CANCELACIÓN / SUSPENSIÓN
+        // CANCELACIÓN
         // ============================
 
         [StringLength(500)]
@@ -164,5 +178,30 @@ namespace InapaWeb.Models
 
         [StringLength(1000)]
         public string Observaciones { get; set; } = string.Empty;
+
+
+
+        // ============================
+        // COMPATIBILIDAD FECHAS
+        // ============================
+
+        [NotMapped]
+        public DateTime? FechaInicio
+        {
+            get => FechaInicioServicio;
+            set
+            {
+                if (value.HasValue)
+                    FechaInicioServicio = value.Value;
+            }
+        }
+
+
+        [NotMapped]
+        public DateTime? FechaFin
+        {
+            get => FechaVencimiento;
+            set => FechaVencimiento = value;
+        }
     }
 }

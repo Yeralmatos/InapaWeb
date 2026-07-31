@@ -543,7 +543,7 @@
 
                                     <td>
                                         <span class="contract-code">
-                                            CT-@item.IdContrato.ToString("00000")
+                                            @($"CT-{item.IdContrato:00000}")
                                         </span>
                                     </td>
 
@@ -567,17 +567,22 @@
 
                                         <div class="tariff-amount">
                                             RD$
-                                            @(item.Cliente?.Tarifa?.Monto.ToString("N2")
-                                                                                ?? "0.00")
+                                            @(item.Cliente?.Tarifa != null
+     ? item.Cliente.Tarifa.Monto.ToString("N2")
+     : "0.00")
                                 </div>
                             </td>
 
                                     <td>
-                                        @item.FechaInicio.ToString("dd/MM/yyyy")
+                                        @(item.FechaInicio.HasValue
+                                            ? item.FechaInicio.Value.ToString("dd/MM/yyyy")
+                                            : "Sin fecha")
                                     </td>
 
                                     <td>
-                                        @item.FechaFin.ToString("dd/MM/yyyy")
+                                        @(item.FechaFin.HasValue
+                                            ? item.FechaFin.Value.ToString("dd/MM/yyyy")
+                                            : "Sin fecha")
                                     </td>
 
                                     <td>

@@ -226,11 +226,10 @@ namespace InapaWeb.Controllers
             }
 
             bool tieneContrato = _context.Contratos
-                .Any(c =>
-                    c.IdCliente == cliente.IdCliente &&
-                    (c.Estado == "Activo" ||
-                     c.Estado == "Pendiente"));
-
+     .Any(c =>
+         c.IdCliente == cliente.IdCliente &&
+         (c.EstadoContrato == "Activo" ||
+          c.EstadoContrato == "Pendiente"));
             if (tieneContrato)
             {
                 TempData["Error"] =

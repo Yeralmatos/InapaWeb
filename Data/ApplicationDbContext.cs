@@ -54,7 +54,6 @@ namespace InapaWeb.Data
         public DbSet<HistorialServicio> HistorialServicios { get; set; }
 
 
-
         // =====================================
         // CONFIGURACIÓN DE RELACIONES
         // =====================================
@@ -64,16 +63,24 @@ namespace InapaWeb.Data
             base.OnModelCreating(modelBuilder);
 
 
-            // Cliente tiene muchos contratos
+            // =====================================
+            // CLIENTE - CONTRATO
+            // Un cliente puede tener muchos contratos
+            // =====================================
+
             modelBuilder.Entity<Contrato>()
                 .HasOne(c => c.Cliente)
-                .WithMany()
+                .WithMany(c => c.Contratos)
                 .HasForeignKey(c => c.IdCliente)
                 .OnDelete(DeleteBehavior.Restrict);
 
 
 
-            // Tarifa tiene muchos contratos
+            // =====================================
+            // TARIFA - CONTRATO
+            // Una tarifa puede estar en muchos contratos
+            // =====================================
+
             modelBuilder.Entity<Contrato>()
                 .HasOne(c => c.Tarifa)
                 .WithMany()

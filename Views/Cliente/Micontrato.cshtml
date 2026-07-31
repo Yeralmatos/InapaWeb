@@ -842,21 +842,23 @@
                                             Fecha de inicio
                                         </div>
 
-                                        <div class="detail-value">
-                                            @Model.FechaInicio.ToString("dd/MM/yyyy")
+                                            <div class="detail-value">
+                                                @(Model.FechaInicioServicio.ToString("dd/MM/yyyy"))
+                                            </div>
+
                                         </div>
 
-                                    </div>
+                                        <div class="detail-row">
 
-                                    <div class="detail-row">
+                                            <div class="detail-label">
+                                                Fecha de finalización
+                                            </div>
 
-                                        <div class="detail-label">
-                                            Fecha de finalización
-                                        </div>
-
-                                        <div class="detail-value">
-                                            @Model.FechaFin.ToString("dd/MM/yyyy")
-                                        </div>
+                                            <div class="detail-value">
+                                                @(Model.FechaVencimiento.HasValue
+                                                    ? Model.FechaVencimiento.Value.ToString("dd/MM/yyyy")
+                                                    : "Sin fecha")
+                                            </div>
 
                                     </div>
 

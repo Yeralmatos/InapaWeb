@@ -1,0 +1,344 @@
+﻿@model InapaWeb.Models.Contrato
+
+@{
+    ViewData["Title"] = "Nuevo Contrato";
+}
+
+<div class="container mt-4">
+
+    <div class="card shadow">
+
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">
+                Registrar Nuevo Contrato
+            </h3>
+        </div>
+
+        <div class="card-body">
+
+            <form asp-action="Crear" method="post">
+
+                @Html.AntiForgeryToken()
+
+                <div class="row">
+
+                    <!-- CLIENTE -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">
+                            Cliente
+                        </label>
+
+                        <select asp-for="IdCliente" class="form-select">
+                            <option value="">
+                                Seleccione un cliente
+                            </option>
+
+                            @foreach (var cliente in ViewBag.Clientes)
+                            {
+                                <option value="@cliente.IdCliente">
+                                    @cliente.Usuario.NombreUsuario
+                                </option>
+                            }
+
+                        </select>
+                    </div>
+
+
+                    <!-- NUMERO CONTRATO -->
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="NumeroContrato" class="form-label">
+                            Número de Contrato
+                        </label>
+
+                        <input asp-for="NumeroContrato"
+                               class="form-control"
+                               placeholder="Ejemplo: CTR-2026-0001" />
+
+                    </div>
+
+
+                    <!-- TIPO CONTRATO -->
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="TipoContrato" class="form-label">
+                            Tipo de Contrato
+                        </label>
+
+                        <select asp-for="TipoContrato" class="form-select">
+
+                            <option value="">
+                                Seleccione...
+                            </option>
+
+                            <option value="Residencial">
+                                Residencial
+                            </option>
+
+                            <option value="Comercial">
+                                Comercial
+                            </option>
+
+                            <option value="Industrial">
+                                Industrial
+                            </option>
+
+                            <option value="Gubernamental">
+                                Gubernamental
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- ESTADO -->
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="EstadoContrato" class="form-label">
+                            Estado del Contrato
+                        </label>
+
+                        <select asp-for="EstadoContrato"
+                                class="form-select">
+
+                            <option value="Pendiente">
+                                Pendiente
+                            </option>
+
+                            <option value="Aprobado">
+                                Aprobado
+                            </option>
+
+                            <option value="Activo">
+                                Activo
+                            </option>
+
+                            <option value="Suspendido">
+                                Suspendido
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <!-- TARIFA -->
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label">
+                        Tarifa
+                    </label>
+
+                    <select asp-for="IdTarifa" class="form-select">
+
+                        <option value="">
+                            Seleccione tarifa
+                        </option>
+
+                        @foreach (var tarifa in ViewBag.Tarifas)
+                        {
+                            <option value="@tarifa.IdTarifa">
+                                @tarifa.Descripcion - @tarifa.Monto
+                            </option>
+                        }
+
+                    </select>
+
+                </div>
+
+                <!-- AQUÍ VA EL BLOQUE DE SERVICIO -->
+
+                <hr />
+
+                <h5 class="text-primary">
+                    Datos del Servicio
+                </h5>
+
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="TipoServicio" class="form-label">
+                            Tipo de Servicio
+                        </label>
+
+                        <select asp-for="TipoServicio" class="form-select">
+
+                            <option value="">
+                                Seleccione...
+                            </option>
+
+                            <option value="Agua Potable">
+                                Agua Potable
+                            </option>
+
+                            <option value="Alcantarillado Sanitario">
+                                Alcantarillado Sanitario
+                            </option>
+
+                            <option value="Agua Potable y Alcantarillado">
+                                Agua Potable y Alcantarillado
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="CategoriaServicio" class="form-label">
+                            Categoría del Servicio
+                        </label>
+
+                        <select asp-for="CategoriaServicio" class="form-select">
+
+                            <option value="">
+                                Seleccione...
+                            </option>
+
+                            <option value="Residencial">
+                                Residencial
+                            </option>
+
+                            <option value="Comercial">
+                                Comercial
+                            </option>
+
+                            <option value="Industrial">
+                                Industrial
+                            </option>
+
+                            <option value="Institucional">
+                                Institucional
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="NumeroMedidor" class="form-label">
+                            Número de Medidor
+                        </label>
+
+                        <input asp-for="NumeroMedidor"
+                               class="form-control" />
+
+                    </div>
+
+
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="Observaciones" class="form-label">
+                            Observaciones
+                        </label>
+
+                        <textarea asp-for="Observaciones"
+                                  class="form-control"></textarea>
+
+                    </div>
+
+                </div>
+                <!-- FECHAS DEL CONTRATO -->
+
+                <hr />
+
+                <h5 class="text-primary">
+                    Control de Fechas
+                </h5>
+
+                <div class="row">
+
+
+                    <div class="col-md-4 mb-3">
+
+                        <label asp-for="FechaInicioServicio" class="form-label">
+                            Fecha Inicio del Servicio
+                        </label>
+
+                        <input asp-for="FechaInicioServicio"
+                               type="date"
+                               class="form-control" />
+
+                    </div>
+
+
+                    <div class="col-md-4 mb-3">
+
+                        <label asp-for="FechaInstalacion" class="form-label">
+                            Fecha de Instalación
+                        </label>
+
+                        <input asp-for="FechaInstalacion"
+                               type="date"
+                               class="form-control" />
+
+                    </div>
+
+
+                    <div class="col-md-4 mb-3">
+
+                        <label asp-for="FechaVencimiento" class="form-label">
+                            Fecha de Vencimiento
+                        </label>
+
+                        <input asp-for="FechaVencimiento"
+                               type="date"
+                               class="form-control" />
+
+                    </div>
+
+
+                </div>
+
+
+                <div class="row">
+
+
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="FechaAprobacion" class="form-label">
+                            Fecha de Aprobación
+                        </label>
+
+                        <input asp-for="FechaAprobacion"
+                               type="date"
+                               class="form-control" />
+
+                    </div>
+
+
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="UsuarioAprobador" class="form-label">
+                            Usuario Aprobador
+                        </label>
+
+                        <input asp-for="UsuarioAprobador"
+                               class="form-control"
+                               placeholder="Nombre del supervisor o administrador" />
+
+                    </div>
+
+
+                </div>
+
+                <!-- BOTONES -->
+
+                <button type="submit" class="btn btn-success">
+                    Guardar Contrato
+                </button>
+
+                <a asp-action="Index"
+                   class="btn btn-secondary">
+                    Volver
+                </a>
+
+
+            </form>
