@@ -1,48 +1,89 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - InapaWeb</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <title>@ViewData["Title"] - INAPA Web</title>
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <!-- Estilos Propios -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/InapaWeb.styles.css" asp-append-version="true" />
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
+    <!-- BARRA DE NAVEGACIÓN (NAVBAR) -->
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">InapaWeb</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+            <div class="container">
+                <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-droplet-fill"></i> INAPA Web
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Index">Inicio</a>
+                        </li>
+
+                        <!-- 📌 MENÚ DESPLEGABLE / ENLACE A CONTRATOS -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdownContratos" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-file-earmark-text"></i> Contratos
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdownContratos">
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Contratos" asp-action="Index">Ver Todos los Contratos</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Contratos" asp-action="Crear">Nuevo Contrato</a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <!-- OTROS MÓDULOS -->
+                        <li class="nav-item">
+                            <a class="nav-link text-white" asp-controller="Reclamaciones" asp-action="Index">Reclamaciones</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link text-white" asp-controller="Averia" asp-action="Index">Averías</a>
+                        </li>
+                    </ul>
+
+                    <!-- MÓDULO DE AUTENTICACIÓN / ACCESO -->
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link text-white" asp-controller="Acceso" asp-action="Login">
+                                <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+                            </a>
                         </li>
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
+
+    <!-- CONTENIDO PRINCIPAL DE CADA VISTA -->
+    <div class="container flex-grow-1 mb-4">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - InapaWeb - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <!-- PIE DE PÁGINA (FOOTER) -->
+    <footer class="border-top footer text-muted bg-light py-3 mt-auto">
+        <div class="container text-center">
+            &copy; @DateTime.Now.Year - INAPA Web - Sistema de Gestión Comercial y Servicio al Cliente
         </div>
     </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- SCRIPTS OBLIGATORIOS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using InapaWeb.Models;
 
+
 namespace InapaWeb.Data
 {
     public class ApplicationDbContext : DbContext
@@ -10,6 +11,7 @@ namespace InapaWeb.Data
             : base(options)
         {
         }
+        
 
         public DbSet<SolicitudServicio> SolicitudesServicio { get; set; }
 

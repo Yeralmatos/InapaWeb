@@ -1,0 +1,113 @@
+@model InapaWeb.Models.Contrato
+
+@{
+    ViewData["Title"] = "Detalle del Contrato";
+}
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">Contrato N°: @Model.NumeroContrato</h3>
+            <span class="badge bg-light text-dark fs-6">
+                Estado: @Model.EstadoContrato
+            </span>
+        </div>
+        
+        <div class="card-body">
+            <!-- SECCIÓN 1: DATOS DEL CLIENTE Y SERVICIO -->
+            <h5 class="text-primary border-bottom pb-2">Información del Titular y Servicio</h5>
+            <div class="row mb-3">
+                <div class="col-md-6 mb-3">
+                    <strong>Cliente / Titular:</strong>
+                    <p class="text-muted">
+                        @(Model.NombreTitular ?? (Model.Cliente?.Usuario?.NombreUsuario ?? "No especificado"))
+                    </p>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <strong>Documento / Cédula:</strong>
+                    <p class="text-muted">@(Model.DocumentoTitular ?? "N/A")</p>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <strong>Teléfono:</strong>
+                    <p class="text-muted">@(Model.TelefonoTitular ?? "N/A")</p>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <strong>Tipo de Servicio:</strong>
+                    <p class="text-muted">@Model.TipoServicio</p>
+                </div>
+            </div>
+
+            <!-- SECCIÓN 2: UBICACIÓN -->
+            <h5 class="text-primary border-bottom pb-2">Ubicación del Servicio</h5>
+            <div class="row mb-3">
+                <div class="col-md-12 mb-3">
+                    <strong>Dirección General:</strong>
+                    <p class="text-muted">@Model.DireccionServicio</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <strong>Sector:</strong>
+                    <p class="text-muted">@(Model.Sector ?? "N/A")</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <strong>Municipio:</strong>
+                    <p class="text-muted">@(Model.Municipio ?? "N/A")</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <strong>Provincia:</strong>
+                    <p class="text-muted">@(Model.Provincia ?? "N/A")</p>
+                </div>
+            </div>
+
+            <!-- SECCIÓN 3: TARIFA Y FECHAS -->
+            <h5 class="text-primary border-bottom pb-2">Detalles Administrativos y Tarifa</h5>
+            <div class="row mb-3">
+                <div class="col-md-6 mb-3">
+                    <strong>Tarifa Asignada:</strong>
+                    <p class="text-muted">
+                        @(Model.Tarifa != null ? Model.Tarifa.Descripcion : "Sin Tarifa Asignada")
+                    </p>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <strong>Categoría del Servicio:</strong>
+                    <p class="text-muted">@Model.CategoriaServicio</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <strong>Fecha de Solicitud:</strong>
+                    <p class="text-muted">@Model.FechaSolicitud.ToString("dd/MM/yyyy")</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <strong>Fecha de Inicio:</strong>
+                    <p class="text-muted">
+                        @(Model.FechaInicioServicio.HasValue ? Model.FechaInicioServicio.Value.ToString("dd/MM/yyyy") : "Pendiente")
+                    </p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <strong>Fecha de Registro:</strong>
+                    <p class="text-muted">@Model.FechaRegistro.ToString("dd/MM/yyyy")</p>
+                </div>
+            </div>
+
+            <!-- SECCIÓN 4: OBSERVACIONES -->
+            @if (!string.IsNullOrEmpty(Model.Observaciones))
+            {
+                <h5 class="text-primary border-bottom pb-2">Observaciones</h5>
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <p class="text-muted">@Model.Observaciones</p>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="card-footer d-flex justify-content-between">
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Volver a la Lista
+            </a>
+            <div>
+                <a asp-action="Editar" asp-route-id="@Model.IdContrato" class="btn btn-warning">
+                    Editar Contrato
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -28,19 +28,18 @@
                             Cliente
                         </label>
 
-                        <select asp-for="IdCliente" class="form-select">
-                            <option value="">
-                                Seleccione un cliente
-                            </option>
-
-                            @foreach (var cliente in ViewBag.Clientes)
-                            {
-                                <option value="@cliente.IdCliente">
-                                    @cliente.Usuario.NombreUsuario
-                                </option>
-                            }
-
-                        </select>
+                      <select asp-for="IdCliente" class="form-select">
+    <option value="">Seleccione un cliente</option>
+    @if (ViewBag.Clientes != null)
+    {
+        foreach (var cliente in ViewBag.Clientes)
+        {
+            <option value="@cliente.IdCliente">
+                @(cliente.Usuario != null ? cliente.Usuario.NombreUsuario : "Cliente #" + cliente.IdCliente)
+            </option>
+        }
+    }
+</select>
                     </div>
 
 
@@ -132,20 +131,18 @@
                         Tarifa
                     </label>
 
-                    <select asp-for="IdTarifa" class="form-select">
-
-                        <option value="">
-                            Seleccione tarifa
-                        </option>
-
-                        @foreach (var tarifa in ViewBag.Tarifas)
-                        {
-                            <option value="@tarifa.IdTarifa">
-                                @tarifa.Descripcion - @tarifa.Monto
-                            </option>
-                        }
-
-                    </select>
+                   <select asp-for="IdTarifa" class="form-select">
+    <option value="">Seleccione tarifa</option>
+    @if (ViewBag.Tarifas != null)
+    {
+        foreach (var tarifa in ViewBag.Tarifas)
+        {
+            <option value="@tarifa.IdTarifa">
+                @tarifa.Descripcion
+            </option>
+        }
+    }
+</select>
 
                 </div>
 

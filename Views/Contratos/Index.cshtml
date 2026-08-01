@@ -1,0 +1,71 @@
+@model IEnumerable<InapaWeb.Models.Contrato>
+
+@{
+    ViewData["Title"] = "Listado de Contratos";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>📄 Gestión de Contratos</h2>
+        <a asp-action="Crear" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Nuevo Contrato
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Nº Contrato</th>
+                            <th>Tipo Servicio</th>
+                            <th>Estado</th>
+                            <th>Fecha Solicitud</th>
+                            <th>Tarifa</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">No hay contratos registrados.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td><strong>@item.NumeroContrato</strong></td>
+                                    <td>@item.TipoServicio</td>
+                                    <td>
+                                        <span class="badge @(item.EstadoContrato == "Activo" ? "bg-success" : "bg-warning text-dark")">
+                                            @item.EstadoContrato
+                                        </span>
+                                    </td>
+                                    <td>@item.FechaSolicitud.ToString("dd/MM/yyyy")</td>
+                                    <td>@(item.Tarifa != null ? item.Tarifa.Descripcion : "N/A")</td>
+                                    <td class="text-center">
+                                        <a asp-action="Detalles" asp-route-id="@item.IdContrato" class="btn btn-sm btn-outline-info">
+                                            Ver Detalle
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
